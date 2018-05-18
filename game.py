@@ -1,7 +1,6 @@
 # IMPORTS
 import pygame
 import random
-import names
 
 # INIT
 pygame.init()
@@ -17,12 +16,27 @@ inHome = True
 inLoad = False
 inName = False
 inNameConfirm = False
+
 # FUNCTIONS
 def randname(gender):
     if gender == 'male':
-        return names.get_first_name(gender='male')
+        name = ''
+        with open ("names/maleFirst.txt", "r") as file:
+            data = file.readlines()
+        name += data[random.randint(0, len(data))].replace('\n', ' ')
+        with open ("names/maleLast.txt", "r") as file:
+            data = file.readlines()
+        name += data[random.randint(0, len(data))].replace('\n', ' ')
+        return name
     elif gender == 'female':
-        return names.get_first_name(gender='female')
+        name = ''
+        with open ("names/femaleFirst.txt", "r") as file:
+            data = file.readlines()
+        name += data[random.randint(0, len(data))].replace('\n', ' ')
+        with open ("names/femaleLast.txt", "r") as file:
+            data = file.readlines()
+        name += data[random.randint(0, len(data))].replace('\n', ' ')
+        return name
 
 
 # CLASSES
@@ -136,6 +150,12 @@ while running:
             elif FemaleButton.rect.collidepoint(event.pos)and  inName:
                 name = randname('female')
                 namePass = True
+            elif YesButton.rect.collidepoint(event.pos) and inNameConfirm:
+                None
+            elif NoButton.rect.collidepoint(event.pos) and inNameConfirm:
+                nameConfirmScreenGroup.remove(nameText)
+                inNameConfirm = False
+                inName = True
         if namePass:
             inName = False
             inNameConfirm = True
