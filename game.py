@@ -13,6 +13,55 @@ s = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
 pygame.display.set_caption("Internship")
 
+# CLASSES
+class base_sprite(pygame.sprite.Sprite):
+        def __init__(self, color=(0,0,0), width=0, height=0, image=None,x=0,y=0, scale=None):
+            pygame.sprite.Sprite.__init__(self)
+            if "Surface" in type(image).__name__:
+                self.image = image
+            else:
+                self.image = pygame.image.load(image)
+            if scale != None:
+                self.image = pygame.transform.scale(self.image, (scale[0], scale[1]))
+            pygame.draw.rect(self.image, color, [5000000,5000000,width,height])
+            self.rect = self.image.get_rect()
+            self.rect.x = x
+            self.rect.y = y
+
+class text(pygame.sprite.Sprite):
+        def __init__(self, text, x, y, font_path="Comic Sans MS", font_size=26, font_colour=(0, 0, 0), opacity=255,background=None):
+                pygame.sprite.Sprite.__init__(self)
+                self.font = pygame.font.SysFont(font_path, font_size)
+                self.color = font_colour
+                self.render_text = text
+                self.rerender(x,y,opacity,background)
+                self.pos = y
+                self.text = text
+                self.opacity = opacity
+                self.background = background
+        def update(self):
+                pass
+        def print_text(self, text_string, x, y):
+                self.render_text = text_string
+                self.rerender(x,y,self.opacity,self.background)
+        def rerender(self, x, y, opacity=255,background=None, center=False):
+                self.image = self.font.render(self.render_text, 0, self.color,background)
+                self.image.set_alpha(opacity)
+                self.rect = self.image.get_rect()
+                self.rect.x = x
+                self.rect.y = y
+                if(center):
+                    self.rect.x = (width/2)-(self.rect.width/2)
+class enemy():
+    def __init__(self, name, health, attack, speed, magic, range, level):
+        self.name = name
+        self.health = health
+        self.attack = attack
+        self.speed = speed
+        self.magic = magic
+        self.range = range
+        self.level = level
+
 # INIT VARS
 running = True
 inHome = True
@@ -32,15 +81,29 @@ newMap = True
 inCon = False
 inInventory = False
 inWait = False
+newInventory = True
+inSpell = False
+inHead = False
+inBody = False
+inHand = False
+inFeet = False
+newSub = True
+inSub = False
+
+spells = []
+head = []
+body = []
+hand = []
+feet = []
 
 classPicked = ''
 actionsToRun = []
-enemies = {'Devil': {'h': 10, 'a': 5, 's': 5, 'm': 0, 'r': 0, 'l': 3}, 'Ghost': {'h': 10, 'a': 5, 's': 3, 'm': 5, 'r': 3, 'l': 3}, 'Goblin': {'h': 5, 'a': 7, 's': 7, 'm': 0, 'r': 0, 'l': 4},
- "Alligator": {'h': 50, 'a': 25, 's': 25, 'm': 0, 'r': 0, 'l': 35}, "Bat": {'h': 20, 'a': 5, 's': 15, 'm': 15, 'r': 5, 'l': 15}, "Bear": {'h': 45, 'a': 30, 's': 25, 'm': 0, 'r': 10, 'l': 40},
- "Bird": {'h': 20, 'a': 5, 's': 15, 'm': 0, 'r': 5, 'l': 10}, "Bomb": {'h': 5, 'a': 20, 's': 10, 'm': 10, 'r': 0, 'l': 25}, "Dino": {'h': 100, 'a': 75, 's': 50, 'm': 0, 'r': 0, 'l': 85},
- 'Frog': {'h': 35, 'a': 15, 's': 25, 'm': 25, 'r': 0, 'l': 35}, "Horse": {'h': 50, 'a': 50, 's': 50, 'm': 0, 'r': 0, 'l': 65}, 'Jellyfish': {'h': 15, 'a': 10, 's': 5, 'm': 5, 'r': 0, 'l': 10},
- "Monkey": {'h': 20, 'a': 10, 's': 15, 'm': 0, 'r': 10, 'l': 15}, "Rat": {'h': 1, 'a': 1, 's': 5, 'm': 0, 'r': 0, 'l': 1}, "Robber": {'h': 30, 'a': 45, 's': 30, 'm': 0, 'r': 20, 'l': 65},
- "Slime": {'h': 5, 'a': 5, 's': 5, 'm': 10, 'r': 0, 'l': 8}, "Snake": {'h': 15,'a': 15, 's': 15, 'm': 0, 'r': 0, 'l': 20}, "Spider": {'h': 10, 'a': 5, 's': 5, 'm': 0, 'r': 5, 'l': 10}}
+enemies = {'Devil': enemy("Devil", 10, 5, 5, 0, 0, 3), 'Ghost': enemy("Ghost", 10, 5, 3, 5, 3, 3), 'Goblin': enemy("Goblin", 5, 7, 7, 0, 0, 4),
+"Alligator": enemy("Alligator", 50, 25, 25, 0, 0, 35), "Bat": enemy("Bat", 20, 5, 15, 15, 5, 15), "Bear": enemy("Bear", 45, 30, 25, 0, 10, 40),
+ "Bird": enemy("Bird", 20, 5, 15, 0, 5, 10), "Bomb": enemy("Bomb", 5, 20, 10, 10, 0, 25), "Dino": enemy("Dino", 100, 75, 50, 0, 0, 85),
+ 'Frog': enemy("Frog", 35, 15, 25, 25, 0, 35), "Horse": enemy("Horse", 50, 50, 50, 0, 0, 65), 'Jellyfish': enemy("Jellyfish", 15, 10, 5, 5, 0, 10),
+ "Monkey": enemy("Monkey", 20, 10, 15, 0, 10, 15), "Rat": enemy("Rat", 1, 1, 5, 0, 0, 1), "Robber": enemy("Robber", 30, 45, 30, 0, 20, 65),
+ "Slime": enemy("Slime", 5, 5, 5, 10, 0, 8), "Snake": enemy("Snake", 15, 15, 15, 0, 0, 20), "Spider": enemy("Spider", 10, 5, 5, 0, 5, 10)}
 
 healthStat = 0
 attackStat = 0
@@ -89,6 +152,7 @@ def genStats(points):
 
     return [attack, health, speed, magic, range]
 def genFloor(mapWidth, mapHeight, minRooms, maxRooms):
+    print(minRooms, maxRooms, mapWidth, mapHeight)
     mapArray = []
     for y in range(0, mapHeight):
         mapArray.append([])
@@ -97,36 +161,28 @@ def genFloor(mapWidth, mapHeight, minRooms, maxRooms):
     start = [random.randint(0, mapWidth-1), random.randint(0, mapHeight-1)]
     mapArray[start[0]][start[1]] = 'x'
     rooms = 0
-    for y in range(0, mapHeight):
-        for x in range(0, mapWidth):
-            if y - 1 > -1 and mapArray[y - 1][x] == 'x':
-                if random.randint(0, 1) == 0 and rooms < maxRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
-                elif rooms < minRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
-            if y + 1 < mapHeight and mapArray[y + 1][x] == 'x':
-                if random.randint(0, 1) == 0 and rooms < maxRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
-                elif rooms < minRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
-            if x - 1 > -1 and mapArray[y][x-1] == 'x':
-                if random.randint(0, 2) == 0 and rooms < maxRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
-                elif rooms < minRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
-            if x + 1 < mapWidth and mapArray[y][x+1] == 'x':
-                if random.randint(0, 2) == 0 and rooms < maxRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
-                elif rooms < minRooms:
-                    mapArray[y][x] = 'x'
-                    rooms += 1
+    def populate(rooms):
+        for y in range(0, mapHeight):
+            for x in range(0, mapWidth):
+                if y - 1 > -1 and mapArray[y - 1][x] == 'x' and mapArray[y][x] != 'x':
+                    if random.randint(0, 2) == 0 and rooms < maxRooms:
+                        mapArray[y][x] = 'x'
+                        rooms += 1
+                if y + 1 < mapHeight and mapArray[y + 1][x] == 'x' and mapArray[y][x] != 'x':
+                    if random.randint(0, 1) == 0 and rooms < maxRooms:
+                        mapArray[y][x] = 'x'
+                        rooms += 1
+                if x - 1 > -1 and mapArray[y][x-1] == 'x' and mapArray[y][x] != 'x':
+                    if random.randint(0, 2) == 0 and rooms < maxRooms:
+                        mapArray[y][x] = 'x'
+                        rooms += 1
+                if x + 1 < mapWidth and mapArray[y][x+1] == 'x' and mapArray[y][x] != 'x':
+                    if random.randint(0, 2) == 0 and rooms < maxRooms:
+                        mapArray[y][x] = 'x'
+                        rooms += 1
+        return rooms
+    while rooms < minRooms:
+        rooms = populate(rooms)
     mapArray[start[0]][start[1]] = 'x'
     for y in range(0, mapHeight-1):
         for x in range(0, mapWidth-1):
@@ -170,46 +226,6 @@ def battle(enemy):
     con.output("Encountered " + enemy + "!")
 
 
-
-# CLASSES
-class base_sprite(pygame.sprite.Sprite):
-        def __init__(self, color=(0,0,0), width=0, height=0, image=None,x=0,y=0):
-            pygame.sprite.Sprite.__init__(self)
-            if "Surface" in type(image).__name__:
-                self.image = image
-            else:
-                self.image = pygame.image.load(image)
-            pygame.draw.rect(self.image, color, [5000000,5000000,width,height])
-            self.rect = self.image.get_rect()
-            self.rect.x = x
-            self.rect.y = y
-
-class text(pygame.sprite.Sprite):
-        def __init__(self, text, x, y, font_path="Comic Sans MS", font_size=26, font_colour=(0, 0, 0), opacity=255,background=None):
-                pygame.sprite.Sprite.__init__(self)
-                self.font = pygame.font.SysFont(font_path, font_size)
-                self.color = font_colour
-                self.render_text = text
-                self.rerender(x,y,opacity,background)
-                self.pos = y
-                self.text = text
-                self.opacity = opacity
-                self.background = background
-        def update(self):
-                pass
-        def print_text(self, text_string, x, y):
-                self.render_text = text_string
-                self.rerender(x,y,self.opacity,self.background)
-        def rerender(self, x, y, opacity=255,background=None, center=False):
-                self.image = self.font.render(self.render_text, 0, self.color,background)
-                self.image.set_alpha(opacity)
-                self.rect = self.image.get_rect()
-                self.rect.x = x
-                self.rect.y = y
-                if(center):
-                    self.rect.x = (width/2)-(self.rect.width/2)
-
-
 # text = text("TEST", "Comic Sans MS",16,(0, 0, 0),15,15,255)
 # SPRITES
 homeScreenGroup = pygame.sprite.Group()
@@ -223,7 +239,7 @@ characterGenGroupEnd = pygame.sprite.Group()
 roomGroup = pygame.sprite.Group()
 mapGroup = pygame.sprite.Group()
 inventoryGroup = pygame.sprite.Group()
-
+subGroup = pygame.sprite.Group()
 
 button = base_sprite(width=70, height=50, image="images/HomeScreenStartButton.png", x=(width/2) - (70/2), y=120)
 homeScreen = base_sprite(width=320, height=240, image="images/back.png", x=0, y=0)
@@ -323,9 +339,16 @@ roomsText = text('rooms: ', 10, 10, font_size = 16)
 roomsNumText = text('0/0', 60, 10, font_size = 16)
 roomGroup.add(floor)
 
+headBorder = base_sprite(width=64, height=64, image="images/ItemBorder.png", x=180, y=10, scale=[50, 50])
+handBorder = base_sprite(width=64, height=64, image="images/ItemBorder.png", x=250, y=94, scale=[50, 50])
+bodyBorder = base_sprite(width=64, height=64, image="images/ItemBorder.png", x=180, y=94, scale=[50, 50])
+feetBorder = base_sprite(width=64, height=64, image="images/ItemBorder.png", x=180, y=178, scale=[50, 50])
+spellBorder = base_sprite(width=64, height=64, image="images/ItemBorder.png", x=110, y=10, scale=[50, 50])
 inventoryGroup.add(back)
 
+xButton = base_sprite(width=25, height=25, image="images/X.png", x=5, y=5, scale=[25, 25])
 
+subGroup.add(back)
 
 
 
@@ -354,6 +377,8 @@ while running:
             elif event.key == pygame.K_i and inGame:
                 print("inventory")
                 inInventory = not inInventory
+                if inInventory:
+                    newInventory = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if inWait:
                 waitAction()
@@ -434,6 +459,23 @@ while running:
             elif rightDoor.rect.collidepoint(event.pos) and inGame and 'right' in directions and not inWait:
                 playerX += 1
                 move = True
+            elif spellBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
+                inSub = True
+                newSub = True
+            elif headBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
+                inSub = True
+                newSub = True
+            elif bodyBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
+                inSub = True
+                newSub = True
+            elif handBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
+                inSub = True
+                newSub = True
+            elif feetBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
+                inSub = True
+                newSub = True
+            elif xButton.rect.collidepoint(event.pos) and inSub:
+                inSub = False
         if namePass:
             inName = False
             inNameConfirm = True
@@ -506,9 +548,9 @@ while running:
     if inGame:
         directions = []
         if genNewFloor:
-            size = math.floor(dist(floorLevel, 1, 99, 3, 20))
-            minRooms = math.floor(dist(floorLevel, 1, 99, 3, 300))
-            maxRooms = math.floor(dist(floorLevel, 1, 99, 7, 350))
+            size = math.floor(dist(floorLevel, 1, 99, 3, 25))
+            minRooms = math.floor(dist(floorLevel, 1, 99, 3, 200))
+            maxRooms = math.floor(dist(floorLevel, 1, 99, 7, 250))
             mapArray = genFloor(size, size, minRooms, maxRooms)
             start = mapArray[0]
             rooms = mapArray[2]
@@ -548,7 +590,41 @@ while running:
             newMap = False
         mapGroup.draw(s)
     if inInventory:
+        if newInventory:
+            newInventory = False
+            inventoryGroup.empty()
+
+            symbol =  base_sprite(width=100, height=100, image="images/"+ classPicked +"Small.png", x=5, y=(height/2)-50)
+
+            inventoryGroup.add(back)
+            inventoryGroup.add(symbol)
+            inventoryGroup.add(headBorder)
+            inventoryGroup.add(handBorder)
+            inventoryGroup.add(bodyBorder)
+            inventoryGroup.add(feetBorder)
+            inventoryGroup.add(spellBorder)
         inventoryGroup.draw(s)
+    if inSub:
+        if newSub:
+            subGroup.empty()
+            subGroup.add(back)
+            subGroup.add(xButton)
+            if inSpell:
+                for i in spells:
+                    None
+            elif inHead:
+                for i in head:
+                    None
+            elif inBody:
+                for i in body:
+                    None
+            elif inHand:
+                for i in hand:
+                    None
+            elif inFeet:
+                for i in feet:
+                    None
+        subGroup.draw(s)
     if inCon:
         con.draw()
     pygame.display.flip()
