@@ -90,7 +90,7 @@ inFeet = False
 newSub = True
 inSub = False
 
-spells = []
+spells = ['MagicBanana', 'SuperBallOfZapping', 'FlashlightOfFrying']
 head = []
 body = []
 hand = []
@@ -462,18 +462,23 @@ while running:
             elif spellBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
                 inSub = True
                 newSub = True
+                inSpell = True
             elif headBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
                 inSub = True
                 newSub = True
+                inHead = True
             elif bodyBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
                 inSub = True
                 newSub = True
+                inBody = True
             elif handBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
                 inSub = True
                 newSub = True
+                inHand = True
             elif feetBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
                 inSub = True
                 newSub = True
+                inFeet = True
             elif xButton.rect.collidepoint(event.pos) and inSub:
                 inSub = False
         if namePass:
@@ -610,20 +615,22 @@ while running:
             subGroup.add(back)
             subGroup.add(xButton)
             if inSpell:
-                for i in spells:
-                    None
+                inventoryPicked = spells
             elif inHead:
-                for i in head:
-                    None
+                inventoryPicked = head
             elif inBody:
-                for i in body:
-                    None
+                invenoryPicked = body
             elif inHand:
-                for i in hand:
-                    None
+                inventoryPicked = hand
             elif inFeet:
-                for i in feet:
-                    None
+                inventoryPicked = feet
+            for index, i in enumerate(inventoryPicked):
+                if index <= 3:
+                    tempY = 1
+                else:
+                    tempY = 2
+                tempSprite = base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=50 + (70*tempY), scale=[50, 50])
+                subGroup.add(tempSprite)
         subGroup.draw(s)
     if inCon:
         con.draw()
