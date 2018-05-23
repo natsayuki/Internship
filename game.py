@@ -61,6 +61,18 @@ class enemy():
         self.magic = magic
         self.range = range
         self.level = level
+class item():
+    def __init__(self, name, health, attack, speed, magic, range, level, itemClass, type):
+        self.name = name
+        self.health = health
+        self.attack = attack
+        self.speed = speed
+        self.magic = magic
+        self.range = range
+        self.level = level
+        self.itemClass = itemClass
+        self.type = type
+
 
 # INIT VARS
 running = True
@@ -90,11 +102,19 @@ inFeet = False
 newSub = True
 inSub = False
 
-spells = ['MagicBanana', 'SuperBallOfZapping', 'FlashlightOfFrying', 'Spear', 'ReallyLongPoker', 'Rock']
-head = []
-body = ['SuperBallOfZapping']
-hand = []
-feet = []
+spells = ['BasicBook']
+head = ['BasicHat']
+body = ['BasicShirt']
+hand = ['BasicThingToHitPeopleWith']
+feet = ['BasicShoes']
+
+spellsEq = 'BasicBook'
+headEq = 'BasicHat'
+bodyEq = 'BasicBody'
+handEq = 'BaiscHand'
+feetEq = 'BasicFeet'
+
+subSprites = None
 
 classPicked = ''
 actionsToRun = []
@@ -105,6 +125,46 @@ enemies = {'Devil': enemy("Devil", 10, 5, 5, 0, 0, 3), 'Ghost': enemy("Ghost", 1
  "Monkey": enemy("Monkey", 20, 10, 15, 0, 10, 15), "Rat": enemy("Rat", 1, 1, 5, 0, 0, 1), "Robber": enemy("Robber", 30, 45, 30, 0, 20, 65),
  "Slime": enemy("Slime", 5, 5, 5, 10, 0, 8), "Snake": enemy("Snake", 15, 15, 15, 0, 0, 20), "Spider": enemy("Spider", 10, 5, 5, 0, 5, 10)}
 
+# name, health, attack, speed, magic, range, itemClass
+items = {"SwordOfSwording": item("SwordOfSwording", 0, 5, 5, 0, 0, 1, 'Warrior', 'hand'),
+"BootsOfMovingAtADecentPace": item("BootsOfMovingAtADecentPace", 5, 0, 10, 0, 0, 1, 'Rogue', 'feet'),
+"BowOfShootingArrows": item("BowOfShootingArrows", 0, 15, 10, 0, 20, 15, 'Ranger', 'hand'),
+"ClubOfCrushing": item("ClubOfCrushing", 5, 15, -5, -5, 0, 8, 'Warrior', 'hand'),
+"Crossbow": item("Crossbow", 0, 5, 5, 0, 25, 35, 'Ranger', 'hand'),
+"DaggerOfDagging": item("DaggerOfDagging", 0, 10, 10, 0, 0, 15, 'Rogue', 'hand'),
+"DaggerOfDemocracy": item("DaggerOfDemocracy", 0, 25, 20, 0, -10, 25, "Rogue", 'hand'),
+"DecapiTater": item("DecapiTater", 0, 10, 5, -5, 0, 8, "Warrior", 'hand'),
+"FakeID": item("FakeID", 5, 3, 5, 0, 0, 5, "Rogue", 'hand'),
+"FlashlightOfFrying": item("FlashlightOfFrying", 0, 0, 0, 35, 0, 28, "Mage", 'hand'),
+"FleshRipper": item("FleshRipper", 15, 15, 5, -10, 0, 20, 'Warrior', 'hand'),
+"Gun": item("Gun", 0, 5, 20, -5, 10, 25, "Ranger", 'hand'),
+"HiddenButterKnife": item("HiddenButterKnife", 0, 5, 10, 0, -5, 10, "Rogue", 'hand'),
+"HolyHobnail": item("HolyHobnail", 0, 15, 0, 0, 0, 8, "Warrior", 'hand'),
+"LighterFullOfSuperMagicFluid": item("LighterFullOfSuperMagicFluid", 0, 0, 5, 25, 0, 25, "Mage", 'hand'),
+"MagicBanana": item("MagicBanana", 0, 5, 5, 10, -5, 10, "Mage", 'hand'),
+"PotOfScaldingMagicWater": item("PotOfScaldingMagicWater", -5, -5, -5, 50, -5, 30, "Mage", 'hand'),
+"QuiverForArrows": item("QuiverForArrows", 0, 0, 5, 0, 10, 10, "Ranger", 'spell'),
+"ReallyHeavyHandBag": item("ReallyHeavyHandBag", 1, 15, 5, 0, 0, 16, "Rogue", 'hand'),
+"ReallyLongPoker": item("ReallyLongPoker", 0, 15, 5, 0, 5, 10, "Ranger", 'hand'),
+"ReallySharpNeedle": item("ReallySharpNeedle", 0, 5, 10, 0, 0, 10, "Rogue", 'hand'),
+"Rock": item("Rock", 0, 5, 0, 0, 0, 5, "Warrior", 'hand'),
+"ScrollOfFreezing": item("ScrollOfFreezing", 0, 0, 15, 15, 0, 20, "Mage", 'spell'),
+"ShootingStar": item("ShootingStar", 0, 5, 10, 0, 10, 8, "Rogue", 'hand'),
+"Shotput": item("Shotput", 0, 15, 15, 0, 5, 15, "Warrior", 'hand'),
+"SkullBasher": item("SkullBasher", 5, 10, 0, 0, 0, 8, "Warrior", 'hand'),
+"Slingshot": item("Slingshot", 0, 0, 10, 0, 5, 5, "Ranger", 'hand'),
+"Spear": item("Spear", 0, 5, 5, 0, 10, 10, "Ranger", 'hand'),
+"SuperBallOfZapping": item("SuperBallOfZapping", 10, 0, 5, 20, 0, 25, "Mage", 'hand'),
+"Trebuchet": item("Trebuchet", 0, 0, 0, 0, 300, 99, "Ranger", 'hand'),
+"TrickCard": item("TrickCard", 0, 0, 10, 15, 0, 10, "Mage", 'hand'),
+"WandOfCastingSpells": item("WandOfCastingSpells", 0, 0, 5, 10, 0, 5, "Mage", 'hand'),
+"BasicBook": item("BasicBook", 0, 0, 0, 0, 0, 1, "All", 'spell'),
+"BasicHat": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'head'),
+"BasicShirt": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'body'),
+"BasicShoes": item("BasicShoes", 0, 0, 0, 0, 0, 1, "All", 'feet'),
+"BasicThingToHitPeopleWith": item("BasicThingToHitPeopleWith", 0, 0, 0, 0, 0, 1, "All", 'hand')
+}
+
 healthStat = 0
 attackStat = 0
 speedStat = 0
@@ -112,7 +172,6 @@ magicStat = 0
 rangeStat = 0
 
 waitAction = None
-
 
 con = PyCon.PyCon(s,
                       (0,0,320,240 / 2),
@@ -486,6 +545,10 @@ while running:
                 inHand = False
                 inBody = False
                 inFeet = False
+            if subSprites != None:
+                for i in subSprites:
+                    if i[1].rect.collidepoint(event.pos) and inSub:
+                        con.output(i[0])
         if namePass:
             inName = False
             inNameConfirm = True
@@ -616,6 +679,8 @@ while running:
         inventoryGroup.draw(s)
     if inSub:
         if newSub:
+            newSub = False
+            subSprites = []
             subGroup.empty()
             subGroup.add(back)
             subGroup.add(xButton)
@@ -634,8 +699,8 @@ while running:
                     tempY = 1
                 else:
                     tempY = 2
-                tempSprite = base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=0 + (70*tempY), scale=[50, 50])
-                subGroup.add(tempSprite)
+                subSprites.append([i, base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=0 + (70*tempY), scale=[50, 50])])
+                subGroup.add(subSprites[len(subSprites) - 1][1])
         subGroup.draw(s)
     if inCon:
         con.draw()
