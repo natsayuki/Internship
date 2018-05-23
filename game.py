@@ -4,6 +4,7 @@ import random
 from random import randint
 import math
 import PyCon
+import time
 
 # INIT
 pygame.init()
@@ -53,7 +54,7 @@ class text(pygame.sprite.Sprite):
                 if(center):
                     self.rect.x = (width/2)-(self.rect.width/2)
 class enemy():
-    def __init__(self, name, health, attack, speed, magic, range, level):
+    def __init__(self, name, health, attack, speed, magic, range, level, weakness):
         self.name = name
         self.health = health
         self.attack = attack
@@ -61,8 +62,9 @@ class enemy():
         self.magic = magic
         self.range = range
         self.level = level
+        self.weakness = weakness
 class item():
-    def __init__(self, name, health, attack, speed, magic, range, level, itemClass, type):
+    def __init__(self, name, health, attack, speed, magic, range, level, itemClass, type, style, gap=4):
         self.name = name
         self.health = health
         self.attack = attack
@@ -72,6 +74,8 @@ class item():
         self.level = level
         self.itemClass = itemClass
         self.type = type
+        self.style = style
+        self.gap = gap
 
 
 # INIT VARS
@@ -101,6 +105,12 @@ inHand = False
 inFeet = False
 newSub = True
 inSub = False
+inFight = False
+inDead = False
+subFloor = False
+
+enemySprite = base_sprite(width=0, height=0, image="images/enemies/devil.png", x=(width/2) - 40, y=(height/2) - 40)
+stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
 
 spells = ['BasicBook']
 head = ['BasicHat']
@@ -110,59 +120,72 @@ feet = ['BasicShoes']
 
 spellsEq = 'BasicBook'
 headEq = 'BasicHat'
-bodyEq = 'BasicBody'
-handEq = 'BaiscHand'
-feetEq = 'BasicFeet'
+bodyEq = 'BasicShirt'
+handEq = 'BasicThingToHitPeopleWith'
+feetEq = 'BasicShoes'
+
+enemyEncountered= None
 
 subSprites = None
 
+delay = 0
+delayAction = ''
+
+stairs = None
+
 classPicked = ''
 actionsToRun = []
-enemies = {'Devil': enemy("Devil", 10, 5, 5, 0, 0, 3), 'Ghost': enemy("Ghost", 10, 5, 3, 5, 3, 3), 'Goblin': enemy("Goblin", 5, 7, 7, 0, 0, 4),
-"Alligator": enemy("Alligator", 50, 25, 25, 0, 0, 35), "Bat": enemy("Bat", 20, 5, 15, 15, 5, 15), "Bear": enemy("Bear", 45, 30, 25, 0, 10, 40),
- "Bird": enemy("Bird", 20, 5, 15, 0, 5, 10), "Bomb": enemy("Bomb", 5, 20, 10, 10, 0, 25), "Dino": enemy("Dino", 100, 75, 50, 0, 0, 85),
- 'Frog': enemy("Frog", 35, 15, 25, 25, 0, 35), "Horse": enemy("Horse", 50, 50, 50, 0, 0, 65), 'Jellyfish': enemy("Jellyfish", 15, 10, 5, 5, 0, 10),
- "Monkey": enemy("Monkey", 20, 10, 15, 0, 10, 15), "Rat": enemy("Rat", 1, 1, 5, 0, 0, 1), "Robber": enemy("Robber", 30, 45, 30, 0, 20, 65),
- "Slime": enemy("Slime", 5, 5, 5, 10, 0, 8), "Snake": enemy("Snake", 15, 15, 15, 0, 0, 20), "Spider": enemy("Spider", 10, 5, 5, 0, 5, 10)}
+enemies = {'Devil': enemy("Devil", 10, 5, 5, 0, 0, 3, 'Range'), 'Ghost': enemy("Ghost", 10, 5, 3, 5, 3, 3, "Magic"), 'Goblin': enemy("Goblin", 5, 7, 7, 0, 0, 4, "Melee"),
+"Alligator": enemy("Alligator", 50, 25, 25, 0, 0, 35, "Range"), "Bat": enemy("Bat", 20, 5, 15, 15, 5, 15, "Melee"), "Bear": enemy("Bear", 45, 30, 25, 0, 10, 40, "Magic"),
+ "Bird": enemy("Bird", 20, 5, 15, 0, 5, 10, "Range"), "Bomb": enemy("Bomb", 5, 20, 10, 10, 0, 25, "Magic"), "Dino": enemy("Dino", 100, 75, 50, 0, 0, 85, "Range"),
+ 'Frog': enemy("Frog", 35, 15, 25, 25, 0, 35, "Melee"), "Horse": enemy("Horse", 50, 50, 50, 0, 0, 65, "Melee"), 'Jellyfish': enemy("Jellyfish", 15, 10, 5, 5, 0, 10, "Magic"),
+ "Monkey": enemy("Monkey", 20, 10, 15, 0, 10, 15, None), "Rat": enemy("Rat", 1, 1, 5, 0, 0, 1, "Melee"), "Robber": enemy("Robber", 30, 45, 30, 0, 20, 65,"Range"),
+ "Slime": enemy("Slime", 5, 5, 5, 10, 0, 8, "Magic"), "Snake": enemy("Snake", 15, 15, 15, 0, 0, 20, "Range"), "Spider": enemy("Spider", 10, 5, 5, 0, 5, 10, "Magic")}
 
-# name, health, attack, speed, magic, range, itemClass
-items = {"SwordOfSwording": item("SwordOfSwording", 0, 5, 5, 0, 0, 1, 'Warrior', 'hand'),
-"BootsOfMovingAtADecentPace": item("BootsOfMovingAtADecentPace", 5, 0, 10, 0, 0, 1, 'Rogue', 'feet'),
-"BowOfShootingArrows": item("BowOfShootingArrows", 0, 15, 10, 0, 20, 15, 'Ranger', 'hand'),
-"ClubOfCrushing": item("ClubOfCrushing", 5, 15, -5, -5, 0, 8, 'Warrior', 'hand'),
-"Crossbow": item("Crossbow", 0, 5, 5, 0, 25, 35, 'Ranger', 'hand'),
-"DaggerOfDagging": item("DaggerOfDagging", 0, 10, 10, 0, 0, 15, 'Rogue', 'hand'),
-"DaggerOfDemocracy": item("DaggerOfDemocracy", 0, 25, 20, 0, -10, 25, "Rogue", 'hand'),
-"DecapiTater": item("DecapiTater", 0, 10, 5, -5, 0, 8, "Warrior", 'hand'),
-"FakeID": item("FakeID", 5, 3, 5, 0, 0, 5, "Rogue", 'hand'),
-"FlashlightOfFrying": item("FlashlightOfFrying", 0, 0, 0, 35, 0, 28, "Mage", 'hand'),
-"FleshRipper": item("FleshRipper", 15, 15, 5, -10, 0, 20, 'Warrior', 'hand'),
-"Gun": item("Gun", 0, 5, 20, -5, 10, 25, "Ranger", 'hand'),
-"HiddenButterKnife": item("HiddenButterKnife", 0, 5, 10, 0, -5, 10, "Rogue", 'hand'),
-"HolyHobnail": item("HolyHobnail", 0, 15, 0, 0, 0, 8, "Warrior", 'hand'),
-"LighterFullOfSuperMagicFluid": item("LighterFullOfSuperMagicFluid", 0, 0, 5, 25, 0, 25, "Mage", 'hand'),
-"MagicBanana": item("MagicBanana", 0, 5, 5, 10, -5, 10, "Mage", 'hand'),
-"PotOfScaldingMagicWater": item("PotOfScaldingMagicWater", -5, -5, -5, 50, -5, 30, "Mage", 'hand'),
-"QuiverForArrows": item("QuiverForArrows", 0, 0, 5, 0, 10, 10, "Ranger", 'spell'),
-"ReallyHeavyHandBag": item("ReallyHeavyHandBag", 1, 15, 5, 0, 0, 16, "Rogue", 'hand'),
-"ReallyLongPoker": item("ReallyLongPoker", 0, 15, 5, 0, 5, 10, "Ranger", 'hand'),
-"ReallySharpNeedle": item("ReallySharpNeedle", 0, 5, 10, 0, 0, 10, "Rogue", 'hand'),
-"Rock": item("Rock", 0, 5, 0, 0, 0, 5, "Warrior", 'hand'),
-"ScrollOfFreezing": item("ScrollOfFreezing", 0, 0, 15, 15, 0, 20, "Mage", 'spell'),
-"ShootingStar": item("ShootingStar", 0, 5, 10, 0, 10, 8, "Rogue", 'hand'),
-"Shotput": item("Shotput", 0, 15, 15, 0, 5, 15, "Warrior", 'hand'),
-"SkullBasher": item("SkullBasher", 5, 10, 0, 0, 0, 8, "Warrior", 'hand'),
-"Slingshot": item("Slingshot", 0, 0, 10, 0, 5, 5, "Ranger", 'hand'),
-"Spear": item("Spear", 0, 5, 5, 0, 10, 10, "Ranger", 'hand'),
-"SuperBallOfZapping": item("SuperBallOfZapping", 10, 0, 5, 20, 0, 25, "Mage", 'hand'),
-"Trebuchet": item("Trebuchet", 0, 0, 0, 0, 300, 99, "Ranger", 'hand'),
-"TrickCard": item("TrickCard", 0, 0, 10, 15, 0, 10, "Mage", 'hand'),
-"WandOfCastingSpells": item("WandOfCastingSpells", 0, 0, 5, 10, 0, 5, "Mage", 'hand'),
-"BasicBook": item("BasicBook", 0, 0, 0, 0, 0, 1, "All", 'spell'),
-"BasicHat": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'head'),
-"BasicShirt": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'body'),
-"BasicShoes": item("BasicShoes", 0, 0, 0, 0, 0, 1, "All", 'feet'),
-"BasicThingToHitPeopleWith": item("BasicThingToHitPeopleWith", 0, 0, 0, 0, 0, 1, "All", 'hand')
+#  name, health, attack, speed, magic, range, level, itemClass, type, style
+items = {"HelmetOfStrength": item("HelmetOfStrength", 30,20,0,0,0,40, "Warrior", "head", None),
+"AccuracyHelmet": item("AccuracyHelmet", 10,30,0,0,50,50,"Ranger","head", None),
+"HelmetOfHexing": item("HelmetOfHexing", 20,0,0,30,0,30,"Mage","head", None),
+"HelmetWithGoggles": item("HelmetWithGoggles", 30,10,25,0,25,35,"Ranger","head", None),
+"MaskOfMasking": item("MaskOfMasking",10,15,30,0,10, 35,"Rouge", "Head", None),
+"RottonTomato": item("RottonTomato",0,100,30,10,100, 80,"Ranger", "hand", "Range"),
+"SwordOfSwording": item("SwordOfSwording", 0, 5, 5, 0, 0, 1, 'Warrior', 'hand', "Melee"),
+"BootsOfMovingAtADecentPace": item("BootsOfMovingAtADecentPace", 5, 0, 10, 0, 0, 1, 'Rogue', 'feet', None),
+"BowOfShootingArrows": item("BowOfShootingArrows", 0, 15, 10, 0, 20, 15, 'Ranger', 'hand', "Range"),
+"ClubOfCrushing": item("ClubOfCrushing", 5, 15, -5, -5, 0, 8, 'Warrior', 'hand',"Melee" ),
+"Crossbow": item("Crossbow", 0, 5, 5, 0, 35, 35, 'Ranger', 'hand', "Range"),
+"DaggerOfDagging": item("DaggerOfDagging", 0, 10, 10, 0, 0, 15, 'Rogue', 'hand', "Melee"),
+"DaggerOfDemocracy": item("DaggerOfDemocracy", 0, 25, 20, 0, -10, 25, "Rogue", 'hand' , "Melee"),
+"DecapiTater": item("DecapiTater", 0, 10, 5, -5, 0, 8, "Warrior", 'hand', "Melee"),
+"FakeID": item("FakeID", 5, 3, 5, 0, 0, 5, "Rogue", 'hand', "Melee"),
+"FlashlightOfFrying": item("FlashlightOfFrying", 0, 0, 0, 35, 0, 28, "Mage", 'hand', "Magic"),
+"FleshRipper": item("FleshRipper", 15, 15, 5, -10, 0, 20, 'Warrior', 'hand', "Melee"),
+"Gun": item("Gun", 0, 5, 20, -5, 10, 25, "Ranger", 'hand', "Range"),
+"HiddenButterKnife": item("HiddenButterKnife", 0, 5, 10, 0, -5, 10, "Rogue", 'hand',"Melee"),
+"HolyHobnail": item("HolyHobnail", 0, 15, 0, 0, 0, 8, "Warrior", 'hand', "Range"),
+"LighterFullOfSuperMagicFluid": item("LighterFullOfSuperMagicFluid", 0, 0, 5, 25, 0, 25, "Mage", 'hand', "Magic"),
+"MagicBanana": item("MagicBanana", 0, 5, 5, 10, -5, 10, "Mage", 'hand', "Magic"),
+"PotOfScaldingMagicWater": item("PotOfScaldingMagicWater", -5, -5, -5, 50, -5, 30, "Mage", 'hand', "Magic"),
+"QuiverForArrows": item("QuiverForArrows", 0, 0, 5, 0, 10, 10, "Ranger", 'spell', None),
+"ReallyHeavyHandBag": item("ReallyHeavyHandBag", 1, 15, 5, 0, 0, 16, "Rogue", 'hand', "Melee" ),
+"ReallyLongPoker": item("ReallyLongPoker", 0, 15, 5, 0, 15, 10, "Ranger", 'hand', "Range"),
+"ReallySharpNeedle": item("ReallySharpNeedle", 0, 5, 10, 0, 0, 10, "Rogue", 'hand', "Melee"),
+"Rock": item("Rock", 0, 5, 0, 0, 0, 5, "Warrior", 'hand', "Melee"),
+"ScrollOfFreezing": item("ScrollOfFreezing", 0, 0, 15, 15, 0, 20, "Mage", 'spell', None),
+"ShootingStar": item("ShootingStar", 0, 5, 10, 0, 10, 8, "Rogue", 'hand', "Range"),
+"Shotput": item("Shotput", 0, 20, 20, 0, 10, 15, "Ranger", 'hand', "Range"),
+"SkullBasher": item("SkullBasher", 5, 10, 0, 0, 0, 8, "Warrior", 'hand', "Melee"),
+"Slingshot": item("Slingshot", 0, 0, 10, 0, 5, 5, "Ranger", 'hand', "Range"),
+"Spear": item("Spear", 0, 5, 5, 0, 10, 10, "Ranger", 'hand', "Range"),
+"SuperBallOfZapping": item("SuperBallOfZapping", 10, 0, 5, 20, 0, 25, "Mage", 'hand', "Magic"),
+"Trebuchet": item("Trebuchet", 0, 0, 0, 0, 300, 99, "Ranger", 'hand', "Range", gap = 1),
+"TrickCard": item("TrickCard", 0, 0, 10, 15, 0, 10, "Mage", 'hand', "Magic"),
+"WandOfCastingSpells": item("WandOfCastingSpells", 0, 0, 5, 10, 0, 5, "Mage", 'hand','Magic'),
+"BasicBook": item("BasicBook", 0, 0, 0, 0, 0, 1, "All", 'spell', None),
+"BasicHat": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'head', None),
+"BasicShirt": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'body', None),
+"BasicShoes": item("BasicShoes", 0, 0, 0, 0, 0, 1, "All", 'feet', None),
+"BasicThingToHitPeopleWith": item("BasicThingToHitPeopleWith", 0, 0, 0, 0, 0, 1, "All", 'hand', "Melee")
 }
 
 healthStat = 0
@@ -170,11 +193,12 @@ attackStat = 0
 speedStat = 0
 magicStat = 0
 rangeStat = 0
+currHealth = 0
 
 waitAction = None
 
 con = PyCon.PyCon(s,
-                      (0,0,320,240 / 2),
+                      (0,0,320,240),
                       functions = {},
                       key_calls = {},
                       vari={"A":100,"B":200,"C":300}#,
@@ -270,20 +294,36 @@ def actionTreasure():
     chest = base_sprite(width=80, height=80, image="images/treasure.png", x=(width/2) - 40, y=(height/2) - 40)
     roomGroup.add(chest)
 def actionEnemy():
-    enemy = list(enemies.keys())[random.randint(0, len(enemies)-1)]
-    enemySprite = base_sprite(width=80, height=80, image="images/enemies/"+enemy+".png", x=(width/2) - 40, y=(height/2) - 40)
+    # Globals are still bad mkay
+    global enemyEncountered, waitAction
+    enemyEncountered = list(enemies.keys())[random.randint(0, len(enemies)-1)]
+    enemySprite = base_sprite(width=80, height=80, image="images/enemies/"+enemyEncountered+".png", x=(width/2) - 40, y=(height/2) - 40)
     roomGroup.add(enemySprite)
-    con.output("Found " + enemy + "!")
-    waitAction = battle(enemy)
+    con.output("Found " + enemyEncountered + "!")
+    waitAction = battle
 def actionNothing():
-    actions = ["PictureOfPotato", "PictureOfChicken"]
+    global stairs #Do not judge globals
+    actions = ["PictureOfPotato", "PictureOfChicken", "Stairs"]
     action = actions[random.randint(0, len(actions) -1)]
-    actionSprite = base_sprite(width=80, height=80, image="images/"+action+".png", x=(width/2) - 40, y=(height/2) - 40)
-    roomGroup.add(actionSprite)
+    if len(miniMap) == rooms:
+        action = "Stairs"
+    if action == "Stairs" and stairs != None:
+        action = "PictureOfPotato"
+    if action == "Stairs":
+        stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
+        roomGroup.add(stairsSprite)
+        stairs = [playerX, playerY]
+    else:
+        actionSprite = base_sprite(width=80, height=80, image="images/"+action+".png", x=(width/2) - 40, y=(height/2) - 40)
+        roomGroup.add(actionSprite)
     con.output("Found " + action + "!")
-def battle(enemy):
-    con.output("Encountered " + enemy + "!")
-
+def battle(enemyEncountered):
+    # We know it's really bad to use globals but we have just 'cause. Don't question it.
+    global enemyHealth, playerTurn, inFight
+    con.output("Encountered " + enemyEncountered + "!")
+    enemyHealth = enemies[enemyEncountered].health
+    playerTurn = speedStat >= enemies[enemyEncountered].speed
+    inFight = True
 
 # text = text("TEST", "Comic Sans MS",16,(0, 0, 0),15,15,255)
 # SPRITES
@@ -299,6 +339,8 @@ roomGroup = pygame.sprite.Group()
 mapGroup = pygame.sprite.Group()
 inventoryGroup = pygame.sprite.Group()
 subGroup = pygame.sprite.Group()
+fightGroup = pygame.sprite.Group()
+deadGroup = pygame.sprite.Group()
 
 button = base_sprite(width=70, height=50, image="images/HomeScreenStartButton.png", x=(width/2) - (70/2), y=120)
 homeScreen = base_sprite(width=320, height=240, image="images/back.png", x=0, y=0)
@@ -409,17 +451,33 @@ xButton = base_sprite(width=25, height=25, image="images/X.png", x=5, y=5, scale
 
 subGroup.add(back)
 
+runButton = base_sprite(width=70, height=50, image="images/RunButton.png", x=30, y=170)
+attackButton = base_sprite(width=70, height=50, image="images/AttackButton.png", x=130, y=170)
+magicButton = base_sprite(width=70, height=50, image="images/MagicButton.png", x=230, y=170)
+healthBarOutline = base_sprite(width=104, height=24, image="images/HealthBarOutline.png", x=200, y=5)
+playerHealthBarOutline = base_sprite(width=104, height=24, image="images/HealthBarOutline.png", x=10, y=140)
+fightBackground = base_sprite(width=320, height=240, image="images/FightBackground.png", x=0, y=0)
+
+deadText = text("You have died", 0, 0, font_size=36)
+deadText.rerender(0, 5, center=True)
+deadMessageText = text("You will be returned to the previous floor", 0, 0, font_size=16)
+deadMessageText.rerender(0, 65, center=True)
+deadContinueButton = base_sprite(width=70, height=50, image="images/ContinueButton.png", x=125, y=170)
+deadGroup.add(back)
+deadGroup.add(deadContinueButton)
+deadGroup.add(deadText)
+deadGroup.add(deadMessageText)
 
 
 
 # MAIN
+move = False
 while running:
     events = pygame.event.get()
     for event in events:
         namePass = False
         classPick = False
         endGen = False
-        move = False
         if event.type == pygame.QUIT:
             running = False;
         elif event.type == pygame.KEYDOWN:
@@ -438,10 +496,15 @@ while running:
                 inInventory = not inInventory
                 if inInventory:
                     newInventory = True
+                else:
+                    inSub = False
+                    inSpell = False
+                    inHead = False
+                    inHand = False
+                    inBody = False
+                    inFeet = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if inWait:
-                waitAction()
-            elif button.rect.collidepoint(event.pos) and inHome:
+            if button.rect.collidepoint(event.pos) and inHome:
                 inHome = False
                 inLoad = True
             elif scanButton.rect.collidepoint(event.pos) and inLoad:
@@ -490,13 +553,26 @@ while running:
                 classPick = True
                 classPicked = 'ranger'
             elif rollButton.rect.collidepoint(event.pos) and inCharacterGen2:
+                characterGenGroup2.empty()
                 stats = genStats(20)
-                characterGenGroup2.remove(attackText)
-                characterGenGroup2.remove(healthText)
-                attackText = text(str(stats[0]), 200, 15)
-                healthText = text(str(stats[1]), 200, 50)
+                healthText = text(str(stats[1]), 200, 0, font_size=20)
+                attackText = text(str(stats[0]), 200, 25, font_size=20)
+                speedText = text(str(stats[2]), 200, 50, font_size=20)
+                magicText = text(str(stats[3]), 200, 75, font_size=20)
+                rangeText = text(str(stats[4]), 200, 100, font_size=20)
+                characterGenGroup2.add(back)
                 characterGenGroup2.add(attackText)
                 characterGenGroup2.add(healthText)
+                characterGenGroup2.add(speedText)
+                characterGenGroup2.add(magicText)
+                characterGenGroup2.add(rangeText)
+                characterGenGroup2.add(rollButton)
+                characterGenGroup2.add(continueButton)
+                characterGenGroup2.add(healthSayText)
+                characterGenGroup2.add(attackSayText)
+                characterGenGroup2.add(speedSayText)
+                characterGenGroup2.add(magicSayText)
+                characterGenGroup2.add(rangeSayText)
             elif continueButton.rect.collidepoint(event.pos) and inCharacterGen2:
                 inCharacterGen2 = False
                 endGen = True
@@ -505,17 +581,23 @@ while running:
                 inLoad = True
             elif YesButton.rect.collidepoint(event.pos) and inCharacterGenEnd:
                 inCharacterGenEnd = False
+                healthStat = stats[1]
+                attackStat = stats[0]
+                speedStat = stats[2]
+                magicStat = stats[3]
+                rangeStat = stats[4]
+                currHealth = stats[1]
                 inGame = True
-            elif topDoor.rect.collidepoint(event.pos) and inGame and 'up' in directions and not inWait:
+            elif topDoor.rect.collidepoint(event.pos) and inGame and 'up' in directions and waitAction == None and not inFight:
                 playerY -= 1
                 move = True
-            elif bottomDoor.rect.collidepoint(event.pos) and inGame and 'down' in directions and not inWait:
+            elif bottomDoor.rect.collidepoint(event.pos) and inGame and 'down' in directions and waitAction == None and not inFight:
                 playerY += 1
                 move = True
-            elif leftDoor.rect.collidepoint(event.pos) and inGame and 'left' in directions and not inWait:
+            elif leftDoor.rect.collidepoint(event.pos) and inGame and 'left' in directions and waitAction == None and not inFight:
                 playerX -= 1
                 move = True
-            elif rightDoor.rect.collidepoint(event.pos) and inGame and 'right' in directions and not inWait:
+            elif rightDoor.rect.collidepoint(event.pos) and inGame and 'right' in directions and waitAction == None and not inFight:
                 playerX += 1
                 move = True
             elif spellBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
@@ -545,10 +627,44 @@ while running:
                 inHand = False
                 inBody = False
                 inFeet = False
+                newInventory = True
+            elif enemySprite.rect.collidepoint(event.pos) and inGame and waitAction != None:
+                print('oh you clicked me')
+                waitAction(enemyEncountered)
+                waitAction = None
+            elif runButton.rect.collidepoint(event.pos) and inFight:
+                if random.randint(0, math.ceil(speedStat/4)) == 0:
+                    con.output("Failed to run away!")
+                    playerTurn = False
+                else:
+                    con.output("Managed to escape!")
+                    inFight = False
+                    move = True
+            elif attackButton.rect.collidepoint(event.pos) and inFight:
+                gap = items[handEq].gap
+                damage = attackStat + items[handEq].attack
+                damage = random.randint(damage - math.floor((damage/gap)), damage + math.floor((damage/gap)))
+                if random.randint(0, math.floor(speedStat/2)) == 0:
+                    con.output("Uh oh! You missed!")
+                else:
+                    con.output("Hit enemy for " + str(damage) + " damage!")
+                    enemyHealth -= damage
+                    if enemyHealth < 0:
+                        enemyHealth = 0
+                playerTurn = False
+            elif deadContinueButton.rect.collidepoint(event.pos) and inDead:
+                inDead = False
+                genNewFloor = True
+            elif stairsSprite.rect.collidepoint(event.pos) and inGame:
+                genNewFloor = True
+
             if subSprites != None:
                 for i in subSprites:
                     if i[1].rect.collidepoint(event.pos) and inSub:
                         con.output(i[0])
+                        exec(items[i[0]].type + 'Eq = "' + i[0] + '"')
+                        newSub = True
+
         if namePass:
             inName = False
             inNameConfirm = True
@@ -564,25 +680,40 @@ while running:
             inCharacterGen2 = True
         if endGen:
             inCharacterGenEnd = True
-            nameText = text(name, 0, 0, font_size=20)
-            nameText.rerender(0, 35, center=True)
-            classText = text(classPicked, 0, 0, font_size=20)
-            classText.rerender(0, 55, center=True)
-            attackText = text("Attack: " + str(stats[0]), 0, 0, font_size=20)
-            attackText.rerender(0, 80, center=True)
-            healthText = text("Health: " + str(stats[1]), 0, 0, font_size=20)
-            healthText.rerender(0, 105, center=True)
+            nameText = text(name, 0, 0, font_size=16)
+            nameText.rerender(0, 25, center=True)
+            classText = text(classPicked, 0, 0, font_size=16)
+            classText.rerender(0, 45, center=True)
+            attackText = text("Attack: " + str(stats[0]), 0, 0, font_size=16)
+            attackText.rerender(0, 85, center=True)
+            healthText = text("Health: " + str(stats[1]), 0, 0, font_size=16)
+            healthText.rerender(0, 65, center=True)
+            speedText = text("Speed: " + str(stats[2]), 0, 0, font_size=16)
+            speedText.rerender(0, 105, center=True)
+            magicText = text("Magic: " + str(stats[3]), 0, 0, font_size=16)
+            magicText.rerender(0, 125, center=True)
+            rangeText = text("Range: " + str(stats[4]), 0, 0, font_size=16)
+            rangeText.rerender(0, 145, center=True)
             characterGenGroupEnd.add(nameText)
             characterGenGroupEnd.add(classText)
             characterGenGroupEnd.add(attackText)
             characterGenGroupEnd.add(healthText)
+            characterGenGroupEnd.add(speedText)
+            characterGenGroupEnd.add(magicText)
+            characterGenGroupEnd.add(rangeText)
         if move:
             roomGroup.empty()
             if [playerX, playerY] not in miniMap:
                 actions = [actionTreasure, actionEnemy, actionNothing, actionNothing]
                 option = random.randint(0, len(actions) -1)
-                actionsToRun.append(actions[option])
+                if stairs == None and len(miniMap) == rooms:
+                    actionsToRun.append(actionNothing)
+                else:
+                    actionsToRun.append(actions[option])
                 miniMap.append([playerX, playerY])
+            elif [playerX, playerY] == stairs:
+                print("Stairs here")
+                roomGroup.add(stairsSprite)
             newMap = True
             move = False
 
@@ -617,10 +748,15 @@ while running:
         characterGenGroupEnd.add(classText)
         characterGenGroupEnd.add(attackText)
         characterGenGroupEnd.add(healthText)
+        characterGenGroupEnd.add(speedText)
+        characterGenGroupEnd.add(magicText)
+        characterGenGroupEnd.add(rangeText)
         characterGenGroupEnd.draw(s)
     if inGame:
         directions = []
         if genNewFloor:
+            roomGroup.empty()
+            miniMap = []
             size = math.floor(dist(floorLevel, 1, 99, 3, 25))
             minRooms = math.floor(dist(floorLevel, 1, 99, 3, 200))
             maxRooms = math.floor(dist(floorLevel, 1, 99, 7, 250))
@@ -676,6 +812,11 @@ while running:
             inventoryGroup.add(bodyBorder)
             inventoryGroup.add(feetBorder)
             inventoryGroup.add(spellBorder)
+            inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + headEq + ".png", x=180, y=10, scale=[50, 50]))
+            inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + handEq + ".png", x=250, y=94, scale=[50, 50]))
+            inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + bodyEq + ".png", x=180, y=94, scale=[50, 50]))
+            inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + feetEq + ".png", x=180, y=178, scale=[50, 50]))
+            inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + spellsEq + ".png", x=110, y=10, scale=[50, 50]))
         inventoryGroup.draw(s)
     if inSub:
         if newSub:
@@ -685,24 +826,86 @@ while running:
             subGroup.add(back)
             subGroup.add(xButton)
             if inSpell:
-                inventoryPicked = spells
+                inventoryPicked = 'spells'
             elif inHead:
-                inventoryPicked = head
+                inventoryPicked = 'head'
             elif inBody:
-                inventoryPicked = body
+                inventoryPicked = 'body'
             elif inHand:
-                inventoryPicked = hand
+                inventoryPicked = 'hand'
             elif inFeet:
-                inventoryPicked = feet
-            for index, i in enumerate(inventoryPicked):
+                inventoryPicked = 'feet'
+            for index, i in enumerate(eval(inventoryPicked)):
                 if index <= 2:
                     tempY = 1
                 else:
                     tempY = 2
                 subSprites.append([i, base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=0 + (70*tempY), scale=[50, 50])])
+                if eval(inventoryPicked + "Eq") == i:
+                    border = base_sprite(width=54, height=54, image="images/ItemBorder.png", x=53 + ((70*index)%210), y=-2 + (70*tempY), scale=[54, 54])
+                    subGroup.add(border)
                 subGroup.add(subSprites[len(subSprites) - 1][1])
         subGroup.draw(s)
+    if inFight:
+        fightGroup.empty()
+        enemyBattleSprite = base_sprite(width=54, height=54, image="images/enemies/"+ enemyEncountered +".png", x=220, y=34, scale=[60, 60])
+        healthBarWidth = math.ceil(dist(enemyHealth, 0, enemies[enemyEncountered].health, 0, 100))
+        healthBar = base_sprite(width=100, height=20, image="images/HealthBar.png", x=202, y=7, scale=[healthBarWidth, 20])
+        playerHealthBarWidth = math.ceil(dist(currHealth, 0, healthStat, 0, 100))
+        print(healthStat, currHealth)
+        playerHealthBar = base_sprite(width=100, height=20, image="images/HealthBar.png", x=12, y=142, scale=[playerHealthBarWidth, 20])
+        fightGroup.add(fightBackground)
+        fightGroup.add(enemyBattleSprite)
+        fightGroup.add(healthBarOutline)
+        fightGroup.add(healthBar)
+        fightGroup.add(playerHealthBarOutline)
+        fightGroup.add(playerHealthBar)
+        if enemyHealth <= 0:
+            inFight = False
+            con.output("You defeated " + enemyEncountered + "!")
+            move = True
+        if playerTurn:
+            yourTurnText = text("Your Turn", 5, 5, font_size=20)
+            fightGroup.add(yourTurnText)
+            fightGroup.add(runButton)
+            fightGroup.add(attackButton)
+            fightGroup.add(magicButton)
+        else:
+            enemyTurnText = text("Enemy's Turn", 5, 5, font_size=20)
+            fightGroup.add(enemyTurnText)
+            if delay == 0:
+                delayAction = 'attack'
+                delay = 60
+        if delay == 1:
+            if delayAction == "pass":
+                con.output("The enemy passes their turn")
+                playerTurn = True
+            elif delayAction == "attack":
+                damage = enemies[enemyEncountered].attack
+                damage = random.randint(damage - math.floor((damage/4)), damage + math.floor((damage/4)))
+                con.output(enemyEncountered + " hit you for " + str(damage) + " damage!")
+                currHealth -= damage
+                if currHealth < 0:
+                    currHealth = 0
+                    inFight = False
+                    inDead = True
+                    subFloor = True
+                playerTurn = True
+        if delay >= 1:
+            delay -= 1
+        fightGroup.draw(s)
+    if inDead:
+        if subFloor:
+            floorLevel -= 1
+            if floorLevel < 1:
+                floorLevel = 1
+            genNewFloor = True
+            currHealth = healthStat
+            subFloor = False
+            con.output("Oh dear, you are dead!")
+        deadGroup.draw(s)
     if inCon:
         con.draw()
+
     pygame.display.flip()
     clock.tick(60)
