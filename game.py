@@ -90,9 +90,9 @@ inFeet = False
 newSub = True
 inSub = False
 
-spells = ['MagicBanana', 'SuperBallOfZapping', 'FlashlightOfFrying']
+spells = ['MagicBanana', 'SuperBallOfZapping', 'FlashlightOfFrying', 'Spear', 'ReallyLongPoker', 'Rock']
 head = []
-body = []
+body = ['SuperBallOfZapping']
 hand = []
 feet = []
 
@@ -481,6 +481,11 @@ while running:
                 inFeet = True
             elif xButton.rect.collidepoint(event.pos) and inSub:
                 inSub = False
+                inSpell = False
+                inHead = False
+                inHand = False
+                inBody = False
+                inFeet = False
         if namePass:
             inName = False
             inNameConfirm = True
@@ -619,17 +624,17 @@ while running:
             elif inHead:
                 inventoryPicked = head
             elif inBody:
-                invenoryPicked = body
+                inventoryPicked = body
             elif inHand:
                 inventoryPicked = hand
             elif inFeet:
                 inventoryPicked = feet
             for index, i in enumerate(inventoryPicked):
-                if index <= 3:
+                if index <= 2:
                     tempY = 1
                 else:
                     tempY = 2
-                tempSprite = base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=50 + (70*tempY), scale=[50, 50])
+                tempSprite = base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=0 + (70*tempY), scale=[50, 50])
                 subGroup.add(tempSprite)
         subGroup.draw(s)
     if inCon:
