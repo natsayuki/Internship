@@ -194,6 +194,8 @@ speedStat = 0
 magicStat = 0
 rangeStat = 0
 currHealth = 0
+currXP = 0
+currLevel = 1
 
 waitAction = None
 
@@ -227,15 +229,15 @@ def randname(gender):
         name += data[random.randint(0, len(data))].replace('\n', ' ')
         return name
 def genStats(points):
-    attack = random.randint(0, points)
-    health = random.randint(0, points)
-    speed = random.randint(0, points)
-    magic = random.randint(0, points)
-    range = random.randint(0, points)
+    attack = random.randint(1, points)
+    health = random.randint(1, points)
+    speed = random.randint(1, points)
+    magic = random.randint(1, points)
+    range = random.randint(1, points)
 
     return [attack, health, speed, magic, range]
 def genFloor(mapWidth, mapHeight, minRooms, maxRooms):
-    print(minRooms, maxRooms, mapWidth, mapHeight)
+    print("Gen New Floor")
     mapArray = []
     for y in range(0, mapHeight):
         mapArray.append([])
@@ -245,6 +247,7 @@ def genFloor(mapWidth, mapHeight, minRooms, maxRooms):
     mapArray[start[0]][start[1]] = 'x'
     rooms = 0
     def populate(rooms):
+        print("Populate")
         for y in range(0, mapHeight):
             for x in range(0, mapWidth):
                 if y - 1 > -1 and mapArray[y - 1][x] == 'x' and mapArray[y][x] != 'x':
@@ -264,7 +267,7 @@ def genFloor(mapWidth, mapHeight, minRooms, maxRooms):
                         mapArray[y][x] = 'x'
                         rooms += 1
         return rooms
-    while rooms < minRooms:
+    while rooms < minRooms and rooms < (mapWidth * mapHeight)-1:
         rooms = populate(rooms)
     mapArray[start[0]][start[1]] = 'x'
     for y in range(0, mapHeight-1):
@@ -272,7 +275,7 @@ def genFloor(mapWidth, mapHeight, minRooms, maxRooms):
             if mapArray[y][x] == 'x':
                 start = [x, y]
                 break
-    return [start, mapArray, rooms]
+    return [start, mapArray, rooms + 1]
 def dist(n, start1, stop1, start2, stop2):
     return ((n-start1)/(stop1-start1))*(stop2-start2)+start2
 def newTile(x, y, type='empty'):
@@ -283,11 +286,12 @@ def newTile(x, y, type='empty'):
 def drawMiniMap():
     for i in miniMap:
         mapGroup.add(newTile(i[0]*10 + indX, i[1]*10 + indY))
-    roomsNumText = text(str(len(miniMap)) + '/' + str(rooms), 60, 10, font_size = 16)
+    roomsNumText = text("rooms: " + str(len(miniMap)) + '/' + str(rooms), 10, 5, font_size = 16)
+    floorText = text("floor: " + str(floorLevel), 10, 20, font_size = 16)
     mapGroup.add(newTile(playerX*10 + indX, playerY*10 + indY, 'in'))
-    mapGroup.add(roomsText)
+    # mapGroup.add(roomsText)
+    mapGroup.add(floorText)
     mapGroup.add(roomsNumText)
-    mapGroup.add(roomsText)
     mapGroup.add(roomsNumText)
 def actionTreasure():
     con.output("Found treasure!")
@@ -296,7 +300,11 @@ def actionTreasure():
 def actionEnemy():
     # Globals are still bad mkay
     global enemyEncountered, waitAction
-    enemyEncountered = list(enemies.keys())[random.randint(0, len(enemies)-1)]
+    def pick():
+        return  list(enemies.keys())[random.randint(0, len(enemies)-1)]
+    enemyEncountered = pick()
+    while enemies[enemyEncountered].level < floorLevel - 5 or enemies[enemyEncountered].level > floorLevel + 5:
+        enemyEncountered = pick()
     enemySprite = base_sprite(width=80, height=80, image="images/enemies/"+enemyEncountered+".png", x=(width/2) - 40, y=(height/2) - 40)
     roomGroup.add(enemySprite)
     con.output("Found " + enemyEncountered + "!")
@@ -305,11 +313,14 @@ def actionNothing():
     global stairs #Do not judge globals
     actions = ["PictureOfPotato", "PictureOfChicken", "Stairs"]
     action = actions[random.randint(0, len(actions) -1)]
-    if len(miniMap) == rooms:
+    if action == "Stairs":
+        if random.randint(0, 8) < 8:
+            action = "PictureOfPotato"
+    if len(miniMap) >= rooms-1:
         action = "Stairs"
     if action == "Stairs" and stairs != None:
         action = "PictureOfPotato"
-    if action == "Stairs":
+    elif action == "Stairs":
         stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
         roomGroup.add(stairsSprite)
         stairs = [playerX, playerY]
@@ -324,6 +335,44 @@ def battle(enemyEncountered):
     enemyHealth = enemies[enemyEncountered].health
     playerTurn = speedStat >= enemies[enemyEncountered].speed
     inFight = True
+def handleXP():
+    global currXP, currLevel, healthStat, attackStat, speedStat, magicStat, rangeStat # globals are bad but it makes it okay if we acknowldge it.  No questions
+    cap = (2 * currLevel * (1 + currLevel))
+    if currXP >= cap:
+        currXP -= cap
+        currLevel += 1
+        con.output("Congratulations! You leveled up!")
+        healthUp = currLevel - math.floor(currLevel/5)
+        attackUp = currLevel - math.floor(currLevel/5)
+        speedUp = currLevel - math.floor(currLevel/5)
+        magicUp = currLevel - math.floor(currLevel/5)
+        rangeUp = currLevel - math.floor(currLevel/5)
+        if classPicked == "mage":
+            magicUp = (currLevel * 5) - math.floor(currLevel/5)
+        elif classPicked == "warrior":
+            attackUp = (currLevel * 3) - math.floor(currLevel/5)
+            healthUp = (currLevel * 2) - math.floor(currLevel/5)
+        elif classPicked == 'ranger':
+            rangeUp = (currLevel * 3) - math.floor(currLevel/5)
+            speedUp = (currLevel * 2) - math.floor(currLevel/5)
+        elif classPicked == "rogue":
+            attackUp = (currLevel * 2) - math.floor(currLevel/3)
+            rangeUp = (currLevel * 2) - math.floor(currLevel/3)
+            speedUp = (currLevel * 2) - math.floor(currLevel/3)
+            magicUp = (currLevel * 2) - math.floor(currLevel/3)
+        con.output("Health: " + str(healthStat) + " + " + str(healthUp) + " -> " + str(healthStat + healthUp))
+        healthStat += healthUp
+        con.output("Attack: " + str(attackStat) + " + " + str(attackUp) + " -> " + str(attackStat + attackUp))
+        attackStat += attackUp
+        con.output("Speed: " + str(speedStat) + " + " + str(speedUp) + " -> " + str(speedStat + speedUp))
+        speedStat += speedUp
+        con.output("Magic: " + str(magicStat) + " + " + str(magicUp) + " -> " + str(magicStat + magicUp))
+        magicStat += magicUp
+        con.output("Range: " + str(rangeStat) + " + " + str(rangeUp) + " -> " + str(rangeStat + rangeUp))
+        rangeStat += rangeUp
+        handleXP()
+
+
 
 # text = text("TEST", "Comic Sans MS",16,(0, 0, 0),15,15,255)
 # SPRITES
@@ -657,6 +706,7 @@ while running:
                 genNewFloor = True
             elif stairsSprite.rect.collidepoint(event.pos) and inGame:
                 genNewFloor = True
+                floorLevel += 1
 
             if subSprites != None:
                 for i in subSprites:
@@ -704,9 +754,9 @@ while running:
         if move:
             roomGroup.empty()
             if [playerX, playerY] not in miniMap:
-                actions = [actionTreasure, actionEnemy, actionNothing, actionNothing]
+                actions = [actionTreasure, actionNothing, actionNothing, actionEnemy]
                 option = random.randint(0, len(actions) -1)
-                if stairs == None and len(miniMap) == rooms:
+                if stairs == None and len(miniMap) >= rooms-1:
                     actionsToRun.append(actionNothing)
                 else:
                     actionsToRun.append(actions[option])
@@ -757,6 +807,8 @@ while running:
         if genNewFloor:
             roomGroup.empty()
             miniMap = []
+            newMap = True
+            stairs = None
             size = math.floor(dist(floorLevel, 1, 99, 3, 25))
             minRooms = math.floor(dist(floorLevel, 1, 99, 3, 200))
             maxRooms = math.floor(dist(floorLevel, 1, 99, 7, 250))
@@ -787,6 +839,9 @@ while running:
         if playerX != size-1 and mapArray[playerY][playerX+1] =='x':
             roomGroup.add(rightDoor)
             directions.append('right')
+        if [playerX, playerY] == stairs:
+            stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
+            roomGroup.add(stairsSprite)
         for i in actionsToRun:
             i()
         actionsToRun = []
@@ -862,7 +917,11 @@ while running:
         fightGroup.add(playerHealthBar)
         if enemyHealth <= 0:
             inFight = False
-            con.output("You defeated " + enemyEncountered + "!")
+            enemyLevel = enemies[enemyEncountered].level
+            expObtained = (random.randint(3, 4) * enemyLevel) - (enemyLevel - math.floor((enemyLevel / (random.randint(5, 6)))))
+            con.output("You defeated " + enemyEncountered + " and gained "+ str(expObtained) +" XP!")
+            currXP += expObtained
+            handleXP()
             move = True
         if playerTurn:
             yourTurnText = text("Your Turn", 5, 5, font_size=20)
