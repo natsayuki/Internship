@@ -110,6 +110,9 @@ inDead = False
 subFloor = False
 inSwap = False
 newSwap = False
+treasureClicked = False
+XPBonus = True
+inInspect = False
 
 enemySprite = base_sprite(width=0, height=0, image="images/enemies/devil.png", x=(width/2) - 40, y=(height/2) - 40)
 stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
@@ -119,7 +122,7 @@ chestSprite = base_sprite(width=80, height=80, image="images/treasure.png", x=(w
 spells = ['BasicBook']
 head = ['BasicHat']
 body = ['BasicShirt']
-hand = ['BasicThingToHitPeopleWith', "BowOfShootingArrows", "DaggerOfDagging", "DaggerOfDemocracy", "DecapiTater", "Gun"]
+hand = ['BasicThingToHitPeopleWith', 'BowOfShootingArrows']
 feet = ['BasicShoes']
 
 spellsEq = 'BasicBook'
@@ -141,12 +144,13 @@ classPicked = ''
 actionsToRun = []
 swapSprites = []
 
-enemies = {'Devil': enemy("Devil", 10, 5, 5, 0, 0, 3, 'Range'), 'Ghost': enemy("Ghost", 10, 5, 3, 5, 3, 3, "Magic"), 'Goblin': enemy("Goblin", 5, 7, 7, 0, 0, 4, "Melee"),
-"Alligator": enemy("Alligator", 50, 25, 25, 0, 0, 35, "Range"), "Bat": enemy("Bat", 20, 5, 15, 15, 5, 15, "Melee"), "Bear": enemy("Bear", 45, 30, 25, 0, 10, 40, "Magic"),
- "Bird": enemy("Bird", 20, 5, 15, 0, 5, 10, "Range"), "Bomb": enemy("Bomb", 5, 20, 10, 10, 0, 25, "Magic"), "Dino": enemy("Dino", 100, 75, 50, 0, 0, 85, "Range"),
- 'Frog': enemy("Frog", 35, 15, 25, 25, 0, 35, "Melee"), "Horse": enemy("Horse", 50, 50, 50, 0, 0, 65, "Melee"), 'Jellyfish': enemy("Jellyfish", 15, 10, 5, 5, 0, 10, "Magic"),
- "Monkey": enemy("Monkey", 20, 10, 15, 0, 10, 15, None), "Rat": enemy("Rat", 1, 1, 5, 0, 0, 1, "Melee"), "Robber": enemy("Robber", 30, 45, 30, 0, 20, 65,"Range"),
- "Slime": enemy("Slime", 5, 5, 5, 10, 0, 8, "Magic"), "Snake": enemy("Snake", 15, 15, 15, 0, 0, 20, "Range"), "Spider": enemy("Spider", 10, 5, 5, 0, 5, 10, "Magic")}
+#name, health, attack, speed, magic, range, level, weakness
+enemies = {'Devil': enemy("Devil", 30, 5, 5, 0, 0, 3, 'Range'), 'Ghost': enemy("Ghost", 30, 5, 3, 5, 3, 3, "Magic"), 'Goblin': enemy("Goblin", 15, 7, 7, 0, 0, 4, "Melee"),
+"Alligator": enemy("Alligator", 150, 25, 25, 0, 0, 35, "Range"), "Bat": enemy("Bat", 60, 5, 15, 15, 5, 15, "Melee"), "Bear": enemy("Bear", 125, 30, 25, 0, 10, 40, "Magic"),
+ "Bird": enemy("Bird", 40, 5, 15, 0, 5, 10, "Range"), "Bomb": enemy("Bomb", 45, 20, 10, 10, 0, 25, "Magic"), "Dino": enemy("Dino", 300, 75, 50, 0, 0, 85, "Range"),
+ 'Frog': enemy("Frog", 70, 15, 25, 25, 0, 35, "Melee"), "Horse": enemy("Horse", 150, 50, 50, 0, 0, 65, "Melee"), 'Jellyfish': enemy("Jellyfish", 50, 10, 5, 5, 0, 10, "Magic"),
+ "Monkey": enemy("Monkey", 80, 10, 15, 0, 10, 15, None), "Rat": enemy("Rat", 10, 1, 5, 0, 0, 1, "Melee"), "Robber": enemy("Robber", 120, 45, 30, 0, 20, 65,"Range"),
+ "Slime": enemy("Slime", 25, 5, 5, 10, 0, 8, "Magic"), "Snake": enemy("Snake", 50, 15, 15, 0, 0, 20, "Range"), "Spider": enemy("Spider", 30, 5, 5, 0, 5, 10, "Magic")}
 
 #  name, health, attack, speed, magic, range, level, itemClass, type, style
 items = {"HelmetOfStrength": item("HelmetOfStrength", 30,20,0,0,0,40, "Warrior", "head", None),
@@ -303,6 +307,8 @@ def drawMiniMap():
     mapGroup.add(roomsNumText)
     mapGroup.add(roomsNumText)
 def actionTreasure():
+    global treasureClicked #no judge
+    treasureClicked = False
     con.output("Found treasure!")
     chestSprite = base_sprite(width=80, height=80, image="images/treasure.png", x=(width/2) - 40, y=(height/2) - 40)
     roomGroup.add(chestSprite)
@@ -345,12 +351,12 @@ def battle(enemyEncountered):
     playerTurn = speedStat >= enemies[enemyEncountered].speed
     inFight = True
 def handleXP():
-    global currXP, currLevel, healthStat, attackStat, speedStat, magicStat, rangeStat # globals are bad but it makes it okay if we acknowldge it.  No questions
+    global currXP, currLevel, healthStat, attackStat, speedStat, magicStat, rangeStat, currHealth # globals are bad but it makes it okay if we acknowldge it.  No questions
     cap = (2 * currLevel * (1 + currLevel))
     if currXP >= cap:
         currXP -= cap
         currLevel += 1
-        con.output("Congratulations! Reached level "+currLevel+"!")
+        con.output("Congratulations! Reached level "+str(currLevel)+"!")
         healthUp = currLevel - math.floor(currLevel/5)
         attackUp = currLevel - math.floor(currLevel/5)
         speedUp = currLevel - math.floor(currLevel/5)
@@ -379,6 +385,7 @@ def handleXP():
         magicStat += magicUp
         con.output("Range: " + str(rangeStat) + " + " + str(rangeUp) + " -> " + str(rangeStat + rangeUp))
         rangeStat += rangeUp
+        currHealth += healthUp
         handleXP()
 
 
@@ -400,6 +407,7 @@ subGroup = pygame.sprite.Group()
 fightGroup = pygame.sprite.Group()
 deadGroup = pygame.sprite.Group()
 swapGroup = pygame.sprite.Group()
+inspectGroup = pygame.sprite.Group()
 
 button = base_sprite(width=70, height=50, image="images/HomeScreenStartButton.png", x=(width/2) - (70/2), y=120)
 homeScreen = base_sprite(width=320, height=240, image="images/back.png", x=0, y=0)
@@ -455,7 +463,7 @@ characterGenGroup1.add(rogueButton)
 characterGenGroup1.add(warriorButton)
 characterGenGroup1.add(rangerButton)
 
-stats = genStats(20)
+stats = genStats(10)
 healthText = text(str(stats[1]), 200, 0, font_size=20)
 attackText = text(str(stats[0]), 200, 25, font_size=20)
 speedText = text(str(stats[2]), 200, 50, font_size=20)
@@ -535,6 +543,9 @@ swapGroup.add(back)
 swapGroup.add(dontSwapButton)
 swapGroup.add(swapText)
 
+
+inspectGroup.add(back)
+inspectGroup.add(xButton)
 
 
 # MAIN
@@ -703,7 +714,7 @@ while running:
                 inBody = False
                 inFeet = False
                 newInventory = True
-            elif enemySprite.rect.collidepoint(event.pos) and inGame and waitAction != None:
+            elif enemySprite.rect.collidepoint(event.pos) and inGame and waitAction != None and not inInventory:
                 print('oh you clicked me')
                 waitAction(enemyEncountered)
                 waitAction = None
@@ -717,7 +728,15 @@ while running:
                     move = True
             elif attackButton.rect.collidepoint(event.pos) and inFight:
                 gap = items[handEq].gap
-                damage = attackStat + items[handEq].attack
+                if items[handEq].style == 'Melee':
+                    damage = attackStat + items[handEq].attack
+                elif items[handEq].style == 'Range':
+                    damage = rangeStat + items[handEq].range
+                elif items[handEq].style == 'Magic':
+                    damage = magicStat + items[handEq].magic
+                if items[handEq].itemClass == classPicked:
+                    damage *= 2
+
                 damage = random.randint(damage - math.floor((damage/gap)), damage + math.floor((damage/gap)))
                 if random.randint(0, math.floor(speedStat/2)) == 0:
                     con.output("Uh oh! You missed!")
@@ -730,10 +749,11 @@ while running:
             elif deadContinueButton.rect.collidepoint(event.pos) and inDead:
                 inDead = False
                 genNewFloor = True
-            elif stairsSprite.rect.collidepoint(event.pos) and inGame and [playerX, playerY] == stairs:
+            elif stairsSprite.rect.collidepoint(event.pos) and inGame and [playerX, playerY] == stairs and not inInventory:
                 genNewFloor = True
                 floorLevel += 1
-            elif chestSprite.rect.collidepoint(event.pos) and inGame:
+            elif chestSprite.rect.collidepoint(event.pos) and inGame and  not treasureClicked and not inInventory:
+                treasureClicked = True
                 itemFound = list(items.keys())[random.randint(0, len(items) -1)]
                 while items[itemFound].level > floorLevel + 5 or items[itemFound].level < floorLevel -5:
                     itemFound = list(items.keys())[random.randint(0, len(items) -1)]
@@ -754,7 +774,10 @@ while running:
                 inSwap = False
             if subSprites != None:
                 for i in subSprites:
-                    if i[1].rect.collidepoint(event.pos) and inSub:
+                    if i[1].rect.collidepoint(event.pos) and i[0] in [spellsEq, headEq, handEq, bodyEq, feetEq]:
+                        inInspect = True
+                        inspecting = i[0]
+                    elif i[1].rect.collidepoint(event.pos) and inSub and not inInspect:
                         con.output("Equipped " + i[0] + "!")
                         exec(items[i[0]].type + 'Eq = "' + i[0] + '"')
                         newSub = True
@@ -819,6 +842,11 @@ while running:
                 roomGroup.add(stairsSprite)
             newMap = True
             move = False
+            if rooms == len(miniMap) and XPBonus:
+                con.output("Discovered all rooms! Received " + str(rooms) + " XP bonus")
+                currXP += rooms
+                handleXP()
+                XPBonus = False
 
     # END UPDATE
     homeScreenGroup.update()
@@ -862,6 +890,7 @@ while running:
             miniMap = []
             newMap = True
             stairs = None
+            XPBonus = True
             size = math.floor(dist(floorLevel, 1, 99, 3, 25))
             minRooms = math.floor(dist(floorLevel, 1, 99, 3, 200))
             maxRooms = math.floor(dist(floorLevel, 1, 99, 7, 250))
@@ -990,23 +1019,26 @@ while running:
             if delay == 0:
                 delayAction = 'attack'
                 delay = 60
-        if delay == 1:
-            if delayAction == "pass":
-                con.output("The enemy passes their turn")
-                playerTurn = True
-            elif delayAction == "attack":
-                damage = enemies[enemyEncountered].attack
-                damage = random.randint(damage - math.floor((damage/4)), damage + math.floor((damage/4)))
-                con.output(enemyEncountered + " hit you for " + str(damage) + " damage!")
-                currHealth -= damage
-                if currHealth < 0:
-                    currHealth = 0
-                    inFight = False
-                    inDead = True
-                    subFloor = True
-                playerTurn = True
-        if delay >= 1:
-            delay -= 1
+            if delay == 1:
+                if delayAction == "pass":
+                    con.output("The enemy passes their turn")
+                    playerTurn = True
+                elif delayAction == "attack":
+                    damage = enemies[enemyEncountered].attack
+                    damage = random.randint(damage - math.floor((damage/4)), damage + math.floor((damage/4)))
+                    armorList = [spellsEq, headEq, bodyEq, handEq, feetEq]
+                    for i in armorList:
+                        damage -= items[i].health
+                    con.output(enemyEncountered + " hit you for " + str(damage) + " damage!")
+                    currHealth -= damage
+                    if currHealth < 0:
+                        currHealth = 0
+                        inFight = False
+                        inDead = True
+                        subFloor = True
+                    playerTurn = True
+            if delay >= 1:
+                delay -= 1
         fightGroup.draw(s)
     if inDead:
         if subFloor:
@@ -1034,6 +1066,18 @@ while running:
                 swapSprites.append([i, base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=-30 + (70*tempY), scale=[50, 50])])
                 swapGroup.add(swapSprites[len(swapSprites)-1][1])
         swapGroup.draw(s)
+    if inInspect:
+        inspectGroup.empty()
+        inspectGroup.add(back)
+        inspectGroup.add(xButton)
+        inspectGroup.add(base_sprite(width=80, height=80, image="images/items/"+inspecting+".png", x=(width/2) - 40, y=5))
+        classTextInspect = text("Class: " + items[inspecting].itemClass, 0, 0, font_size=20)
+        classTextInspect.rerender(0, 90, center=True)
+        inspectGroup.add(classTextInspect)
+        healthTextInspect = text("Health: " + items[inspecting].health, 0, 0, font_size=20)
+        healthTextInspect.rerender(0, 115, center=True)
+        inspectGroup.add(healthTextInspect)
+        inspectGroup.draw(s)
     if inCon:
         con.draw()
 
