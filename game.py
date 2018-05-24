@@ -108,14 +108,18 @@ inSub = False
 inFight = False
 inDead = False
 subFloor = False
+inSwap = False
+newSwap = False
 
 enemySprite = base_sprite(width=0, height=0, image="images/enemies/devil.png", x=(width/2) - 40, y=(height/2) - 40)
 stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
+chestSprite = base_sprite(width=80, height=80, image="images/treasure.png", x=(width/2) - 40, y=(height/2) - 40)
+
 
 spells = ['BasicBook']
 head = ['BasicHat']
 body = ['BasicShirt']
-hand = ['BasicThingToHitPeopleWith']
+hand = ['BasicThingToHitPeopleWith', "BowOfShootingArrows", "DaggerOfDagging", "DaggerOfDemocracy", "DecapiTater", "Gun"]
 feet = ['BasicShoes']
 
 spellsEq = 'BasicBook'
@@ -135,6 +139,8 @@ stairs = None
 
 classPicked = ''
 actionsToRun = []
+swapSprites = []
+
 enemies = {'Devil': enemy("Devil", 10, 5, 5, 0, 0, 3, 'Range'), 'Ghost': enemy("Ghost", 10, 5, 3, 5, 3, 3, "Magic"), 'Goblin': enemy("Goblin", 5, 7, 7, 0, 0, 4, "Melee"),
 "Alligator": enemy("Alligator", 50, 25, 25, 0, 0, 35, "Range"), "Bat": enemy("Bat", 20, 5, 15, 15, 5, 15, "Melee"), "Bear": enemy("Bear", 45, 30, 25, 0, 10, 40, "Magic"),
  "Bird": enemy("Bird", 20, 5, 15, 0, 5, 10, "Range"), "Bomb": enemy("Bomb", 5, 20, 10, 10, 0, 25, "Magic"), "Dino": enemy("Dino", 100, 75, 50, 0, 0, 85, "Range"),
@@ -147,7 +153,7 @@ items = {"HelmetOfStrength": item("HelmetOfStrength", 30,20,0,0,0,40, "Warrior",
 "AccuracyHelmet": item("AccuracyHelmet", 10,30,0,0,50,50,"Ranger","head", None),
 "HelmetOfHexing": item("HelmetOfHexing", 20,0,0,30,0,30,"Mage","head", None),
 "HelmetWithGoggles": item("HelmetWithGoggles", 30,10,25,0,25,35,"Ranger","head", None),
-"MaskOfMasking": item("MaskOfMasking",10,15,30,0,10, 35,"Rouge", "Head", None),
+"MaskOfMasking": item("MaskOfMasking",10,15,30,0,10, 35,"Rouge", "head", None),
 "RottonTomato": item("RottonTomato",0,100,30,10,100, 80,"Ranger", "hand", "Range"),
 "SwordOfSwording": item("SwordOfSwording", 0, 5, 5, 0, 0, 1, 'Warrior', 'hand', "Melee"),
 "BootsOfMovingAtADecentPace": item("BootsOfMovingAtADecentPace", 5, 0, 10, 0, 0, 1, 'Rogue', 'feet', None),
@@ -166,12 +172,12 @@ items = {"HelmetOfStrength": item("HelmetOfStrength", 30,20,0,0,0,40, "Warrior",
 "LighterFullOfSuperMagicFluid": item("LighterFullOfSuperMagicFluid", 0, 0, 5, 25, 0, 25, "Mage", 'hand', "Magic"),
 "MagicBanana": item("MagicBanana", 0, 5, 5, 10, -5, 10, "Mage", 'hand', "Magic"),
 "PotOfScaldingMagicWater": item("PotOfScaldingMagicWater", -5, -5, -5, 50, -5, 30, "Mage", 'hand', "Magic"),
-"QuiverForArrows": item("QuiverForArrows", 0, 0, 5, 0, 10, 10, "Ranger", 'spell', None),
+"QuiverForArrows": item("QuiverForArrows", 0, 0, 5, 0, 10, 10, "Ranger", 'spells', None),
 "ReallyHeavyHandBag": item("ReallyHeavyHandBag", 1, 15, 5, 0, 0, 16, "Rogue", 'hand', "Melee" ),
 "ReallyLongPoker": item("ReallyLongPoker", 0, 15, 5, 0, 15, 10, "Ranger", 'hand', "Range"),
 "ReallySharpNeedle": item("ReallySharpNeedle", 0, 5, 10, 0, 0, 10, "Rogue", 'hand', "Melee"),
 "Rock": item("Rock", 0, 5, 0, 0, 0, 5, "Warrior", 'hand', "Melee"),
-"ScrollOfFreezing": item("ScrollOfFreezing", 0, 0, 15, 15, 0, 20, "Mage", 'spell', None),
+"ScrollOfFreezing": item("ScrollOfFreezing", 0, 0, 15, 15, 0, 20, "Mage", 'spells', None),
 "ShootingStar": item("ShootingStar", 0, 5, 10, 0, 10, 8, "Rogue", 'hand', "Range"),
 "Shotput": item("Shotput", 0, 20, 20, 0, 10, 15, "Ranger", 'hand', "Range"),
 "SkullBasher": item("SkullBasher", 5, 10, 0, 0, 0, 8, "Warrior", 'hand', "Melee"),
@@ -181,7 +187,7 @@ items = {"HelmetOfStrength": item("HelmetOfStrength", 30,20,0,0,0,40, "Warrior",
 "Trebuchet": item("Trebuchet", 0, 0, 0, 0, 300, 99, "Ranger", 'hand', "Range", gap = 1),
 "TrickCard": item("TrickCard", 0, 0, 10, 15, 0, 10, "Mage", 'hand', "Magic"),
 "WandOfCastingSpells": item("WandOfCastingSpells", 0, 0, 5, 10, 0, 5, "Mage", 'hand','Magic'),
-"BasicBook": item("BasicBook", 0, 0, 0, 0, 0, 1, "All", 'spell', None),
+"BasicBook": item("BasicBook", 0, 0, 0, 0, 0, 1, "All", 'spells', None),
 "BasicHat": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'head', None),
 "BasicShirt": item("BasicHat", 0, 0, 0, 0, 0, 1, "All", 'body', None),
 "BasicShoes": item("BasicShoes", 0, 0, 0, 0, 0, 1, "All", 'feet', None),
@@ -283,20 +289,23 @@ def newTile(x, y, type='empty'):
         return base_sprite(width=10, height=10, image="images/roomTile.png", x=x, y=y)
     if type == 'in':
         return base_sprite(width=10, height=10, image="images/roomTileIn.png", x=x, y=y)
+    if type == 'stairs':
+        return base_sprite(width=10, height=10, image="images/stairsTile.png", x=x, y=y)
 def drawMiniMap():
     for i in miniMap:
         mapGroup.add(newTile(i[0]*10 + indX, i[1]*10 + indY))
     roomsNumText = text("rooms: " + str(len(miniMap)) + '/' + str(rooms), 10, 5, font_size = 16)
     floorText = text("floor: " + str(floorLevel), 10, 20, font_size = 16)
+    if stairs != None:
+        mapGroup.add(newTile(stairs[0]*10 + indX, stairs[1]*10 + indY, 'stairs'))
     mapGroup.add(newTile(playerX*10 + indX, playerY*10 + indY, 'in'))
-    # mapGroup.add(roomsText)
     mapGroup.add(floorText)
     mapGroup.add(roomsNumText)
     mapGroup.add(roomsNumText)
 def actionTreasure():
     con.output("Found treasure!")
-    chest = base_sprite(width=80, height=80, image="images/treasure.png", x=(width/2) - 40, y=(height/2) - 40)
-    roomGroup.add(chest)
+    chestSprite = base_sprite(width=80, height=80, image="images/treasure.png", x=(width/2) - 40, y=(height/2) - 40)
+    roomGroup.add(chestSprite)
 def actionEnemy():
     # Globals are still bad mkay
     global enemyEncountered, waitAction
@@ -341,7 +350,7 @@ def handleXP():
     if currXP >= cap:
         currXP -= cap
         currLevel += 1
-        con.output("Congratulations! You leveled up!")
+        con.output("Congratulations! Reached level "+currLevel+"!")
         healthUp = currLevel - math.floor(currLevel/5)
         attackUp = currLevel - math.floor(currLevel/5)
         speedUp = currLevel - math.floor(currLevel/5)
@@ -390,6 +399,7 @@ inventoryGroup = pygame.sprite.Group()
 subGroup = pygame.sprite.Group()
 fightGroup = pygame.sprite.Group()
 deadGroup = pygame.sprite.Group()
+swapGroup = pygame.sprite.Group()
 
 button = base_sprite(width=70, height=50, image="images/HomeScreenStartButton.png", x=(width/2) - (70/2), y=120)
 homeScreen = base_sprite(width=320, height=240, image="images/back.png", x=0, y=0)
@@ -518,6 +528,14 @@ deadGroup.add(deadText)
 deadGroup.add(deadMessageText)
 
 
+dontSwapButton = base_sprite(width=100, height=50, image="images/DontSwapButton.png", x=(width/2)-50, y=180)
+swapText = text("Pick an item to swap.", 0, 0, font_size=20)
+swapText.rerender(0, 5, center=True)
+swapGroup.add(back)
+swapGroup.add(dontSwapButton)
+swapGroup.add(swapText)
+
+
 
 # MAIN
 move = False
@@ -637,18 +655,26 @@ while running:
                 rangeStat = stats[4]
                 currHealth = stats[1]
                 inGame = True
-            elif topDoor.rect.collidepoint(event.pos) and inGame and 'up' in directions and waitAction == None and not inFight:
+            elif topDoor.rect.collidepoint(event.pos) and inGame and 'up' in directions and waitAction == None and not inFight and not inSwap:
                 playerY -= 1
                 move = True
-            elif bottomDoor.rect.collidepoint(event.pos) and inGame and 'down' in directions and waitAction == None and not inFight:
+            elif bottomDoor.rect.collidepoint(event.pos) and inGame and 'down' in directions and waitAction == None and not inFight and not inSwap:
                 playerY += 1
                 move = True
-            elif leftDoor.rect.collidepoint(event.pos) and inGame and 'left' in directions and waitAction == None and not inFight:
+            elif leftDoor.rect.collidepoint(event.pos) and inGame and 'left' in directions and waitAction == None and not inFight and not inSwap:
                 playerX -= 1
                 move = True
-            elif rightDoor.rect.collidepoint(event.pos) and inGame and 'right' in directions and waitAction == None and not inFight:
+            elif rightDoor.rect.collidepoint(event.pos) and inGame and 'right' in directions and waitAction == None and not inFight and not inSwap:
                 playerX += 1
                 move = True
+            elif topDoor.rect.collidepoint(event.pos) and waitAction != None:
+                con.output("The enemy won't let you leave the room")
+            elif bottomDoor.rect.collidepoint(event.pos) and waitAction != None:
+                con.output("The enemy won't let you leave the room")
+            elif leftDoor.rect.collidepoint(event.pos) and waitAction != None:
+                con.output("The enemy won't let you leave the room")
+            elif rightDoor.rect.collidepoint(event.pos) and waitAction != None:
+                con.output("The enemy won't let you leave the room")
             elif spellBorder.rect.collidepoint(event.pos) and inInventory and not inSub:
                 inSub = True
                 newSub = True
@@ -704,16 +730,43 @@ while running:
             elif deadContinueButton.rect.collidepoint(event.pos) and inDead:
                 inDead = False
                 genNewFloor = True
-            elif stairsSprite.rect.collidepoint(event.pos) and inGame:
+            elif stairsSprite.rect.collidepoint(event.pos) and inGame and [playerX, playerY] == stairs:
                 genNewFloor = True
                 floorLevel += 1
+            elif chestSprite.rect.collidepoint(event.pos) and inGame:
+                itemFound = list(items.keys())[random.randint(0, len(items) -1)]
+                while items[itemFound].level > floorLevel + 5 or items[itemFound].level < floorLevel -5:
+                    itemFound = list(items.keys())[random.randint(0, len(items) -1)]
+                con.output("Obtained " + itemFound + "!")
+                itemSprite = base_sprite(width=80, height=80, image="images/items/"+ itemFound +".png", x=(width/2)-40, y=(height/2)-40)
+                roomGroup.remove(chestSprite)
+                roomGroup.add(itemSprite)
 
+                if eval("'" + itemFound + "' in " + items[itemFound].type):
+                    None
+                elif len(eval(items[itemFound].type)) >= 6:
+                    inSwap = True
+                    newSwap = True
+                    con.output("You are carying too many " + items[itemFound].type.replace('s', '') + ' items.')
+                else:
+                    exec(items[itemFound].type + ".append('"+itemFound+"')")
+            elif dontSwapButton.rect.collidepoint(event.pos) and inSwap:
+                inSwap = False
             if subSprites != None:
                 for i in subSprites:
                     if i[1].rect.collidepoint(event.pos) and inSub:
-                        con.output(i[0])
+                        con.output("Equipped " + i[0] + "!")
                         exec(items[i[0]].type + 'Eq = "' + i[0] + '"')
                         newSub = True
+            if len(swapSprites) >  0:
+                for i in swapSprites:
+                    if i[1].rect.collidepoint(event.pos) and inSwap:
+                        con.output("Swapped" + i[0] + " for " + itemFound + '.')
+                        print(i[0], eval(items[itemFound].type))
+                        eval(items[itemFound].type).remove(i[0])
+                        eval(items[itemFound].type).append(itemFound)
+                        exec(items[itemFound].type + 'Eq = "' + itemFound + '"')
+                        inSwap = False
 
         if namePass:
             inName = False
@@ -754,7 +807,7 @@ while running:
         if move:
             roomGroup.empty()
             if [playerX, playerY] not in miniMap:
-                actions = [actionTreasure, actionNothing, actionNothing, actionEnemy]
+                actions = [actionTreasure, actionNothing, actionNothing, actionNothing, actionEnemy, actionEnemy]
                 option = random.randint(0, len(actions) -1)
                 if stairs == None and len(miniMap) >= rooms-1:
                     actionsToRun.append(actionNothing)
@@ -842,8 +895,10 @@ while running:
         if [playerX, playerY] == stairs:
             stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
             roomGroup.add(stairsSprite)
-        for i in actionsToRun:
-            i()
+        # for i in actionsToRun:
+        #     i()
+        if len(actionsToRun) >= 1:
+            actionsToRun[len(actionsToRun)-1]()
         actionsToRun = []
 
         roomGroup.draw(s)
@@ -963,6 +1018,22 @@ while running:
             subFloor = False
             con.output("Oh dear, you are dead!")
         deadGroup.draw(s)
+    if inSwap:
+        if newSwap:
+            newSwap = False
+            swapGroup.empty()
+            swapGroup.add(back)
+            swapGroup.add(swapText)
+            swapGroup.add(dontSwapButton)
+            swapSprites = []
+            for index, i in enumerate(eval(items[itemFound].type)):
+                if index <= 2:
+                    tempY = 1
+                else:
+                    tempY = 2
+                swapSprites.append([i, base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=-30 + (70*tempY), scale=[50, 50])])
+                swapGroup.add(swapSprites[len(swapSprites)-1][1])
+        swapGroup.draw(s)
     if inCon:
         con.draw()
 
