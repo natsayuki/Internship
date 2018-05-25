@@ -336,7 +336,7 @@ def actionNothing():
     if action == "Stairs" and stairs != None:
         action = "PictureOfPotato"
     elif action == "Stairs":
-        stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
+        stairsSprite = base_sprite(width=80, height=80, image="images/stairs.png", x=(width/2) - 40, y=(height/2) - 40)
         roomGroup.add(stairsSprite)
         stairs = [playerX, playerY]
     else:
