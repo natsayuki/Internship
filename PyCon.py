@@ -349,9 +349,6 @@ class PyCon:
                         arguments = v.__code__.co_varnames[1:v.__code__.co_argcount]
                     else:
                         arguments = v.__code__.co_varnames[:v.__code__.co_argcount]
-                    out = i + f": Takes {v.__code__.co_argcount - (v.__code__.co_varnames[0] is 'self')} arguments {arguments}. "
-                else:
-                   out = i + ": Takes %d arguments. " % (v.__code__.co_argcount)
                 doc = v.__doc__
                 if doc:
                     out += textwrap.dedent(doc)

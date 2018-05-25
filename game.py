@@ -114,8 +114,8 @@ treasureClicked = False
 XPBonus = True
 inInspect = False
 
-enemySprite = base_sprite(width=0, height=0, image="images/enemies/devil.png", x=(width/2) - 40, y=(height/2) - 40)
-stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
+enemySprite = base_sprite(width=0, height=0, image="images/enemies/Devil.png", x=(width/2) - 40, y=(height/2) - 40)
+stairsSprite = base_sprite(width=80, height=80, image="images/stairs.png", x=(width/2) - 40, y=(height/2) - 40)
 chestSprite = base_sprite(width=80, height=80, image="images/treasure.png", x=(width/2) - 40, y=(height/2) - 40)
 
 
