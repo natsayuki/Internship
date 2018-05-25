@@ -852,10 +852,13 @@ while running:
     homeScreenGroup.update()
     nameConfirmScreenGroup.update()
     if inHome:
+        homeScreenGroup.update()
         homeScreenGroup.draw(s)
     if inLoad:
+        loadScreenGroup.update()
         loadScreenGroup.draw(s)
     if inName:
+        nameScreenGroup.update()
         nameScreenGroup.draw(s)
     if inNameConfirm:
         nameConfirmScreenGroup.empty()
@@ -863,12 +866,16 @@ while running:
         nameConfirmScreenGroup.add(YesButton)
         nameConfirmScreenGroup.add(NoButton)
         nameConfirmScreenGroup.add(nameText)
+        nameConfirmScreenGroup.update()
         nameConfirmScreenGroup.draw(s)
     if inCharacterGen:
+        characterGenGroup.update()
         characterGenGroup.draw(s)
     if inCharacterGen1:
+        characterGenGroup1.update()
         characterGenGroup1.draw(s)
     if inCharacterGen2:
+        characterGenGroup2.update()
         characterGenGroup2.draw(s)
     if inCharacterGenEnd:
         characterGenGroupEnd.empty()
@@ -882,6 +889,7 @@ while running:
         characterGenGroupEnd.add(speedText)
         characterGenGroupEnd.add(magicText)
         characterGenGroupEnd.add(rangeText)
+        characterGenGroupEnd.update()
         characterGenGroupEnd.draw(s)
     if inGame:
         directions = []
@@ -929,13 +937,14 @@ while running:
         if len(actionsToRun) >= 1:
             actionsToRun[len(actionsToRun)-1]()
         actionsToRun = []
-
+        roomGroup.update()
         roomGroup.draw(s)
     if inMap:
         if newMap:
             mapGroup.empty()
             drawMiniMap()
             newMap = False
+        mapGroup.update()
         mapGroup.draw(s)
     if inInventory:
         if newInventory:
@@ -956,6 +965,7 @@ while running:
             inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + bodyEq + ".png", x=180, y=94, scale=[50, 50]))
             inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + feetEq + ".png", x=180, y=178, scale=[50, 50]))
             inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + spellsEq + ".png", x=110, y=10, scale=[50, 50]))
+        inventoryGroup.update()
         inventoryGroup.draw(s)
     if inSub:
         if newSub:
@@ -984,6 +994,7 @@ while running:
                     border = base_sprite(width=54, height=54, image="images/ItemBorder.png", x=53 + ((70*index)%210), y=-2 + (70*tempY), scale=[54, 54])
                     subGroup.add(border)
                 subGroup.add(subSprites[len(subSprites) - 1][1])
+        subGroup.update()
         subGroup.draw(s)
     if inFight:
         fightGroup.empty()
@@ -1039,6 +1050,7 @@ while running:
                     playerTurn = True
             if delay >= 1:
                 delay -= 1
+        fightGroup.update()
         fightGroup.draw(s)
     if inDead:
         if subFloor:
@@ -1049,6 +1061,7 @@ while running:
             currHealth = healthStat
             subFloor = False
             con.output("Oh dear, you are dead!")
+        deadGroup.update()
         deadGroup.draw(s)
     if inSwap:
         if newSwap:
@@ -1065,6 +1078,7 @@ while running:
                     tempY = 2
                 swapSprites.append([i, base_sprite(width=50, height=50, image="images/items/"+ i +".png", x=55 + ((70*index)%210), y=-30 + (70*tempY), scale=[50, 50])])
                 swapGroup.add(swapSprites[len(swapSprites)-1][1])
+        swapGroup.update()
         swapGroup.draw(s)
     if inInspect:
         inspectGroup.empty()
@@ -1074,9 +1088,22 @@ while running:
         classTextInspect = text("Class: " + items[inspecting].itemClass, 0, 0, font_size=20)
         classTextInspect.rerender(0, 90, center=True)
         inspectGroup.add(classTextInspect)
-        healthTextInspect = text("Health: " + items[inspecting].health, 0, 0, font_size=20)
+        healthTextInspect = text("Health: " + str(items[inspecting].health), 0, 0, font_size=20)
         healthTextInspect.rerender(0, 115, center=True)
         inspectGroup.add(healthTextInspect)
+        attackTextInspect = text("Attack: " + str(items[inspecting].attack), 0, 0, font_size=20)
+        attackTextInspect.rerender(0, 140, center=True)
+        inspectGroup.add(attackTextInspect)
+        rangeTextInspect = text("Range: " + str(items[inspecting].range), 0, 0, font_size=20)
+        rangeTextInspect.rerender(0, 165, center=True)
+        inspectGroup.add(rangeTextInspect)
+        magicTextInspect = text("Magic: " + str(items[inspecting].magic), 0, 0, font_size=20)
+        magicTextInspect.rerender(0, 190, center=True)
+        inspectGroup.add(magicTextInspect)
+        speedTextInspect = text("Speed: " + str(items[inspecting].speed), 0, 0, font_size=20)
+        speedTextInspect.rerender(0, 215, center=True)
+        inspectGroup.add(speedTextInspect)
+        inspectGroup.update()
         inspectGroup.draw(s)
     if inCon:
         con.draw()
