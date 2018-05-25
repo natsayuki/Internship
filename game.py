@@ -922,7 +922,7 @@ while running:
             roomGroup.add(rightDoor)
             directions.append('right')
         if [playerX, playerY] == stairs:
-            stairsSprite = base_sprite(width=80, height=80, image="images/Stairs.png", x=(width/2) - 40, y=(height/2) - 40)
+            stairsSprite = base_sprite(width=80, height=80, image="images/stairs.png", x=(width/2) - 40, y=(height/2) - 40)
             roomGroup.add(stairsSprite)
         # for i in actionsToRun:
         #     i()
