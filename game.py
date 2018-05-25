@@ -851,6 +851,7 @@ while running:
     # END UPDATE
     homeScreenGroup.update()
     nameConfirmScreenGroup.update()
+    pygame.display.update()
     if inHome:
         homeScreenGroup.update()
         homeScreenGroup.draw(s)
@@ -1107,6 +1108,7 @@ while running:
         inspectGroup.draw(s)
     if inCon:
         con.draw()
-
+    pygame.display.update()
     pygame.display.flip()
+    pygame.display.update()
     clock.tick(60)
