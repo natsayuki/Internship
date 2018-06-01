@@ -451,7 +451,7 @@ def handleXP():
 def genBoss():
     # just dont even bother judging spaghetti globals at this point
     global floorLevel, bosses, inBoss, bossEncountered, bossHealth, floorLevel, bossAttack, bossMaxHealth
-    bossEncountered = bosses[list(bosses.keys())[random.randint(0, len(bosses) -1)]]
+    bossEncountered = list(bosses.keys())[random.randint(0, len(bosses) -1)]
     con.output("A very angry " + bossEncountered + " has caught you!")
     inBoss = True
     bossHealth = bosses[bossEncountered].health + floorLevel
@@ -882,6 +882,8 @@ while running:
                 bossNewTurn = True
                 newPhase = True
                 newTurn = True
+            elif xButton.rect.collidepoint(event.pos) and inInspect:
+                inInspect = False
             if subSprites != None:
                 for i in subSprites:
                     if i[1].rect.collidepoint(event.pos) and i[0] in [spellsEq, headEq, handEq, bodyEq, feetEq] and inSub:
@@ -968,15 +970,15 @@ while running:
     if inHome:
         homeScreenGroup.update()
         homeScreenGroup.draw(s)
-        bigBlit(homeScreenGroup)
+        #bigBlit(homeScreenGroup)
     if inLoad:
         loadScreenGroup.update()
         loadScreenGroup.draw(s)
-        bigBlit(loadScreenGroup)
+        #bigBlit(loadScreenGroup)
     if inName:
         nameScreenGroup.update()
         nameScreenGroup.draw(s)
-        bigBlit(nameScreenGroup)
+        #bigBlit(nameScreenGroup)
     if inNameConfirm:
         nameConfirmScreenGroup.empty()
         nameConfirmScreenGroup.add(NameConfirmBackground)
@@ -985,19 +987,19 @@ while running:
         nameConfirmScreenGroup.add(nameText)
         nameConfirmScreenGroup.update()
         nameConfirmScreenGroup.draw(s)
-        bigBlit(nameConfirmScreenGroup)
+        #bigBlit(nameConfirmScreenGroup)
     if inCharacterGen:
         characterGenGroup.update()
         characterGenGroup.draw(s)
-        bigBlit(characterGenGroup)
+        #bigBlit(characterGenGroup)
     if inCharacterGen1:
         characterGenGroup1.update()
         characterGenGroup1.draw(s)
-        bigBlit(characterGenGroup1)
+        #bigBlit(characterGenGroup1)
     if inCharacterGen2:
         characterGenGroup2.update()
         characterGenGroup2.draw(s)
-        bigBlit(characterGenGroup2)
+        #bigBlit(characterGenGroup2)
     if inCharacterGenEnd:
         characterGenGroupEnd.empty()
         characterGenGroupEnd.add(characterGenEndBackground)
@@ -1012,7 +1014,7 @@ while running:
         characterGenGroupEnd.add(rangeText)
         characterGenGroupEnd.update()
         characterGenGroupEnd.draw(s)
-        bigBlit(characterGenGroupEnd)
+        #bigBlit(characterGenGroupEnd)
     if inGame:
         directions = []
         if genNewFloor:
@@ -1060,7 +1062,7 @@ while running:
         actionsToRun = []
         roomGroup.update()
         roomGroup.draw(s)
-        bigBlit(roomGroup)
+        #bigBlit(roomGroup)
     if inMap:
         if newMap:
             mapGroup.empty()
@@ -1068,7 +1070,7 @@ while running:
             newMap = False
         mapGroup.update()
         mapGroup.draw(s)
-        bigBlit(mapGroup)
+        #bigBlit(mapGroup)
     if inInventory:
         if newInventory:
             newInventory = False
@@ -1090,7 +1092,7 @@ while running:
             inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + spellsEq + ".png", x=110, y=10, scale=[50, 50]))
         inventoryGroup.update()
         inventoryGroup.draw(s)
-        bigBlit(inventoryGroup)
+        #bigBlit(inventoryGroup)
     if inSub:
         if newSub:
             newSub = False
@@ -1120,7 +1122,7 @@ while running:
                 subGroup.add(subSprites[len(subSprites) - 1][1])
         subGroup.update()
         subGroup.draw(s)
-        bigBlit(subGroup)
+        #bigBlit(subGroup)
     if inFight:
         fightGroup.empty()
         enemyBattleSprite = base_sprite(width=54, height=54, image="images/enemies/"+ enemyEncountered +".png", x=220, y=34, scale=[60, 60])
@@ -1185,7 +1187,7 @@ while running:
                 delay -= 1
         fightGroup.update()
         fightGroup.draw(s)
-        bigBlit(fightGroup)
+        #bigBlit(fightGroup)
     if inDead:
         if subFloor:
             floorLevel -= 1
@@ -1197,7 +1199,7 @@ while running:
             con.output("Oh dear, you are dead!")
         deadGroup.update()
         deadGroup.draw(s)
-        bigBlit(deadGroup)
+        #bigBlit(deadGroup)
     if inSwap:
         if newSwap:
             newSwap = False
@@ -1215,7 +1217,7 @@ while running:
                 swapGroup.add(swapSprites[len(swapSprites)-1][1])
         swapGroup.update()
         swapGroup.draw(s)
-        bigBlit(swapGroup)
+        #bigBlit(swapGroup)
     if inInspect:
         inspectGroup.empty()
         inspectGroup.add(back)
@@ -1241,7 +1243,7 @@ while running:
         inspectGroup.add(speedTextInspect)
         inspectGroup.update()
         inspectGroup.draw(s)
-        bigBlit(inspectGroup)
+        #bigBlit(inspectGroup)
     if inBoss:
         bossGroup.empty()
         bossGroup.add(fightBackground)
@@ -1286,15 +1288,16 @@ while running:
             inDead = True
             inBoss = False
             currHealth = healthStat
+            floorLevel -= 2
         if bossHealth <= 0:
             bossHealth = 1
-            XPGained = randint(4 * floorLevel, 5 * floorLevel)
+            XPGained = random.randint(4 * floorLevel, 5 * floorLevel)
             con.output("You defeated " + bossEncountered)
             inBoss = False
             floorLevel += 1
             genNewFloor = True
         bossGroup.draw(s)
-        bigBlit(bossGroup)
+        #bigBlit(bossGroup)
     if inCon:
         con.draw()
     pygame.display.update()
