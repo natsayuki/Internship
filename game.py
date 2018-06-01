@@ -16,9 +16,9 @@ pygame.display.set_caption("Internship")
 
 # CLASSES
 class base_sprite(pygame.sprite.Sprite):
-        def __init__(self, color=(0,0,0), width=0, height=0, image=None,x=0,y=0, scale=None):
+        def __init__(self, color=(0,0,0), width=0, height=0, image=None,x=0,y=0, scale=None, surface=False):
             pygame.sprite.Sprite.__init__(self)
-            if "Surface" in type(image).__name__:
+            if "Surface" in type(image).__name__ or surface:
                 self.image = image
             else:
                 self.image = pygame.image.load(image)
@@ -28,6 +28,8 @@ class base_sprite(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.rect.x = x
             self.rect.y = y
+        def blit(self, screen):
+            self.image.blit(self.image, screen)
 
 class text(pygame.sprite.Sprite):
         def __init__(self, text, x, y, font_path="Comic Sans MS", font_size=26, font_colour=(0, 0, 0), opacity=255,background=None):
@@ -76,6 +78,14 @@ class item():
         self.type = type
         self.style = style
         self.gap = gap
+class boss():
+    def __init__(self, name, health, attack, speed, magic, range):
+        self.name = name
+        self.health = health
+        self.attack = attack
+        self.speed = speed
+        self.magic = magic
+        self.range = range
 
 
 # INIT VARS
@@ -113,6 +123,15 @@ newSwap = False
 treasureClicked = False
 XPBonus = True
 inInspect = False
+inBoss = False
+bossTurn = True
+newPhase = True
+bossNewTurn = True
+inBossEnd = False
+hitTimer = 0
+newTurn = True
+wait = 0
+
 
 enemySprite = base_sprite(width=0, height=0, image="images/enemies/Devil.png", x=(width/2) - 40, y=(height/2) - 40)
 stairsSprite = base_sprite(width=80, height=80, image="images/stairs.png", x=(width/2) - 40, y=(height/2) - 40)
@@ -122,7 +141,7 @@ chestSprite = base_sprite(width=80, height=80, image="images/treasure.png", x=(w
 spells = ['BasicBook']
 head = ['BasicHat']
 body = ['BasicShirt']
-hand = ['BasicThingToHitPeopleWith', 'BowOfShootingArrows']
+hand = ['BasicThingToHitPeopleWith']
 feet = ['BasicShoes']
 
 spellsEq = 'BasicBook'
@@ -131,7 +150,11 @@ bodyEq = 'BasicShirt'
 handEq = 'BasicThingToHitPeopleWith'
 feetEq = 'BasicShoes'
 
-enemyEncountered= None
+enemyEncountered = None
+bossEncountered = "Smolk"
+bossHealth = 150
+bossAttack = 10
+bossMaxHealth = 150
 
 subSprites = None
 
@@ -145,7 +168,7 @@ actionsToRun = []
 swapSprites = []
 
 #name, health, attack, speed, magic, range, level, weakness
-enemies = {'Devil': enemy("Devil", 30, 5, 5, 0, 0, 3, 'Range'), 'Ghost': enemy("Ghost", 30, 5, 3, 5, 3, 3, "Magic"), 'Goblin': enemy("Goblin", 15, 7, 7, 0, 0, 4, "Melee"),
+enemies = {'Devil': enemy("Devil", 30, 3, 5, 0, 0, 3, 'Range'), 'Ghost': enemy("Ghost", 30, 3, 3, 5, 3, 3, "Magic"), 'Goblin': enemy("Goblin", 15, 5, 7, 0, 0, 4, "Melee"),
 "Alligator": enemy("Alligator", 150, 25, 25, 0, 0, 35, "Range"), "Bat": enemy("Bat", 60, 5, 15, 15, 5, 15, "Melee"), "Bear": enemy("Bear", 125, 30, 25, 0, 10, 40, "Magic"),
  "Bird": enemy("Bird", 40, 5, 15, 0, 5, 10, "Range"), "Bomb": enemy("Bomb", 45, 20, 10, 10, 0, 25, "Magic"), "Dino": enemy("Dino", 300, 75, 50, 0, 0, 85, "Range"),
  'Frog': enemy("Frog", 70, 15, 25, 25, 0, 35, "Melee"), "Horse": enemy("Horse", 150, 50, 50, 0, 0, 65, "Melee"), 'Jellyfish': enemy("Jellyfish", 50, 10, 5, 5, 0, 10, "Magic"),
@@ -198,16 +221,53 @@ items = {"HelmetOfStrength": item("HelmetOfStrength", 30,20,0,0,0,40, "Warrior",
 "BasicThingToHitPeopleWith": item("BasicThingToHitPeopleWith", 0, 0, 0, 0, 0, 1, "All", 'hand', "Melee")
 }
 
-healthStat = 0
-attackStat = 0
-speedStat = 0
-magicStat = 0
-rangeStat = 0
-currHealth = 0
+angryRockBossPhase = 0
+angryWindUpRobotBossPhase = 0
+atoplocrastPhase = 0
+calipatusPhase = 0
+daplomesPhase = 0
+datastricreaverPhase = 0
+dauremiPhase = 0
+dragonPhase = 0
+evilOctopusPhase = 0
+hexagonamalitPhase = 0
+koplerPhase = 0
+krempPhase = 0
+sharkBossPhase = 0
+smolkPhase = 0
+zedoreptPhase = 0
+
+#name, health, attack, speed, magic, range, phase1, phase2, phase3
+bosses ={
+"AngryRockBoss": boss("AngryRockBoss", 150, 10, 15, 0, 0),
+"AngryWindUpRobotBoss": boss("AngryWindUpRobotBoss", 200, 5, 5, 10, 10),
+"Atoplocrast": boss("Atoplocrast", 180, 8, 15, 0, 0),
+"Calipatus": boss("Calipatus", 200, 3, 10, 20, 5),
+"Daplomes": boss("Daplomes", 150, 0, 5, 25, 5),
+"Datastricreaver": boss("Datastricreaver", 250, 8, 5, 0, 0),
+"Dauremi": boss("Dauremi", 100, 5, 5, 5, 5),
+"Dragon": boss("Dragon", 200, 10, 10, 10, 0),
+"EvilOctopus": boss("EvilOctopus", 200, 10, 5, 0, 5),
+"Hexagonamalit": boss("Hexagonamalit", 150, 8, 8, 0, 0),
+"Kopler": boss("Kopler", 100, 5, 5, 0, 0),
+"Kremp": boss("Kremp", 150, 15, 15, 0, 0),
+"SharkBoss": boss("SharkBoss", 200, 15, 15, 0, 0),
+"Smolk": boss("Smolk", 150, 0, 0, 25, 0),
+"Zedorept": boss("Zedorept", 150, 15, 15, 5, 5)
+}
+
+healthStat = 50
+attackStat = 50
+speedStat = 50
+magicStat = 50
+rangeStat = 50
+currHealth = 50
 currXP = 0
 currLevel = 1
 
 waitAction = None
+
+enemyMaxHealth = 0
 
 con = PyCon.PyCon(s,
                       (0,0,320,240),
@@ -239,11 +299,11 @@ def randname(gender):
         name += data[random.randint(0, len(data))].replace('\n', ' ')
         return name
 def genStats(points):
-    attack = random.randint(1, points)
-    health = random.randint(1, points)
-    speed = random.randint(1, points)
-    magic = random.randint(1, points)
-    range = random.randint(1, points)
+    attack = random.randint(5, points)
+    health = random.randint(5, points)
+    speed = random.randint(5, points)
+    magic = random.randint(5, points)
+    range = random.randint(5, points)
 
     return [attack, health, speed, magic, range]
 def genFloor(mapWidth, mapHeight, minRooms, maxRooms):
@@ -345,9 +405,10 @@ def actionNothing():
     con.output("Found " + action + "!")
 def battle(enemyEncountered):
     # We know it's really bad to use globals but we have just 'cause. Don't question it.
-    global enemyHealth, playerTurn, inFight
+    global enemyHealth, playerTurn, inFight, floorLevel, enemyMaxHealth
     con.output("Encountered " + enemyEncountered + "!")
-    enemyHealth = enemies[enemyEncountered].health
+    enemyHealth = random.randint(enemies[enemyEncountered].health, enemies[enemyEncountered].health + (floorLevel * 2))
+    enemyMaxHealth = enemyHealth
     playerTurn = speedStat >= enemies[enemyEncountered].speed
     inFight = True
 def handleXP():
@@ -363,18 +424,18 @@ def handleXP():
         magicUp = currLevel - math.floor(currLevel/5)
         rangeUp = currLevel - math.floor(currLevel/5)
         if classPicked == "mage":
-            magicUp = (currLevel * 5) - math.floor(currLevel/5)
+            magicUp = (currLevel * 2) - math.floor(currLevel/5)
         elif classPicked == "warrior":
-            attackUp = (currLevel * 3) - math.floor(currLevel/5)
-            healthUp = (currLevel * 2) - math.floor(currLevel/5)
+            attackUp = math.floor(currLevel * 1.75) - math.floor(currLevel/5)
+            healthUp = math.floor(currLevel * 1.25) - math.floor(currLevel/5)
         elif classPicked == 'ranger':
-            rangeUp = (currLevel * 3) - math.floor(currLevel/5)
-            speedUp = (currLevel * 2) - math.floor(currLevel/5)
+            rangeUp = math.floor(currLevel * 1.75) - math.floor(currLevel/5)
+            speedUp = math.floor(currLevel * 1.25) - math.floor(currLevel/5)
         elif classPicked == "rogue":
-            attackUp = (currLevel * 2) - math.floor(currLevel/3)
-            rangeUp = (currLevel * 2) - math.floor(currLevel/3)
-            speedUp = (currLevel * 2) - math.floor(currLevel/3)
-            magicUp = (currLevel * 2) - math.floor(currLevel/3)
+            attackUp = (currLevel * 1.25) - math.floor(currLevel/3)
+            rangeUp = (currLevel * 1.25) - math.floor(currLevel/3)
+            speedUp = (currLevel * 1.25) - math.floor(currLevel/3)
+            magicUp = (currLevel * 1.25) - math.floor(currLevel/3)
         con.output("Health: " + str(healthStat) + " + " + str(healthUp) + " -> " + str(healthStat + healthUp))
         healthStat += healthUp
         con.output("Attack: " + str(attackStat) + " + " + str(attackUp) + " -> " + str(attackStat + attackUp))
@@ -387,6 +448,28 @@ def handleXP():
         rangeStat += rangeUp
         currHealth += healthUp
         handleXP()
+def genBoss():
+    # just dont even bother judging spaghetti globals at this point
+    global floorLevel, bosses, inBoss, bossEncountered, bossHealth, floorLevel, bossAttack, bossMaxHealth
+    bossEncountered = bosses[list(bosses.keys())[random.randint(0, len(bosses) -1)]]
+    con.output("A very angry " + bossEncountered + " has caught you!")
+    inBoss = True
+    bossHealth = bosses[bossEncountered].health + floorLevel
+    bossAttack = bosses[bossEncountered].attack + floorLevel
+    bossMaxHealth = bosses[bossEncountered].health + floorLevel
+lowerCaseFirst = lambda s: s[:1].lower() + s[1:] if s else ''
+def bigBlit(group):
+    global s #still lazy ok
+    surface = pygame.image.load("images/back.png")
+    for i in group:
+        surface.blit(i.image, (i.rect.x, i.rect.y))
+    group = pygame.sprite.Group()
+    group.add(base_sprite(image=surface, width=320, height=240, x=0, y=0, surface=True))
+    group.draw(s)
+
+
+
+
 
 
 
@@ -408,6 +491,7 @@ fightGroup = pygame.sprite.Group()
 deadGroup = pygame.sprite.Group()
 swapGroup = pygame.sprite.Group()
 inspectGroup = pygame.sprite.Group()
+bossGroup = pygame.sprite.Group()
 
 button = base_sprite(width=70, height=50, image="images/HomeScreenStartButton.png", x=(width/2) - (70/2), y=120)
 homeScreen = base_sprite(width=320, height=240, image="images/back.png", x=0, y=0)
@@ -547,6 +631,8 @@ swapGroup.add(swapText)
 inspectGroup.add(back)
 inspectGroup.add(xButton)
 
+bossGroup.add(fightBackground)
+
 
 # MAIN
 move = False
@@ -581,6 +667,7 @@ while running:
                     inHand = False
                     inBody = False
                     inFeet = False
+                    inInspect = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if button.rect.collidepoint(event.pos) and inHome:
                 inHome = False
@@ -706,7 +793,7 @@ while running:
                 inSub = True
                 newSub = True
                 inFeet = True
-            elif xButton.rect.collidepoint(event.pos) and inSub:
+            elif xButton.rect.collidepoint(event.pos) and inSub and not inInspect:
                 inSub = False
                 inSpell = False
                 inHead = False
@@ -726,7 +813,7 @@ while running:
                     con.output("Managed to escape!")
                     inFight = False
                     move = True
-            elif attackButton.rect.collidepoint(event.pos) and inFight:
+            elif attackButton.rect.collidepoint(event.pos) and inFight and playerTurn:
                 gap = items[handEq].gap
                 if items[handEq].style == 'Melee':
                     damage = attackStat + items[handEq].attack
@@ -737,7 +824,7 @@ while running:
                 if items[handEq].itemClass == classPicked:
                     damage *= 2
 
-                damage = random.randint(damage - math.floor((damage/gap)), damage + math.floor((damage/gap)))
+                damage = random.randint(int(damage - math.floor((damage/gap))), int(damage + math.floor((damage/gap))))
                 if random.randint(0, math.floor(speedStat/2)) == 0:
                     con.output("Uh oh! You missed!")
                 else:
@@ -750,8 +837,11 @@ while running:
                 inDead = False
                 genNewFloor = True
             elif stairsSprite.rect.collidepoint(event.pos) and inGame and [playerX, playerY] == stairs and not inInventory:
-                genNewFloor = True
-                floorLevel += 1
+                if str(floorLevel)[len(str(floorLevel)) -1] == '9':
+                    genBoss()
+                else:
+                    genNewFloor = True
+                    floorLevel += 1
             elif chestSprite.rect.collidepoint(event.pos) and inGame and  not treasureClicked and not inInventory:
                 treasureClicked = True
                 itemFound = list(items.keys())[random.randint(0, len(items) -1)]
@@ -772,9 +862,29 @@ while running:
                     exec(items[itemFound].type + ".append('"+itemFound+"')")
             elif dontSwapButton.rect.collidepoint(event.pos) and inSwap:
                 inSwap = False
+            elif xButton.rect.collidepoint(event.pos) and inInspect:
+                inInspect = False
+            elif attackButton.rect.collidepoint(event.pos) and inBoss and not bossTurn:
+                gap = items[handEq].gap
+                if items[handEq].style == 'Melee':
+                    damage = attackStat + items[handEq].attack
+                elif items[handEq].style == 'Range':
+                    damage = rangeStat + items[handEq].range
+                elif items[handEq].style == 'Magic':
+                    damage = magicStat + items[handEq].magic
+                if items[handEq].itemClass == classPicked:
+                    damage *= 2
+
+                damage = random.randint(int(damage - math.floor((damage/gap))), int(damage + math.floor((damage/gap))))
+                con.output("You hit " + bossEncountered + " for " + str(damage) + "!")
+                bossHealth -= damage
+                bossTurn =True
+                bossNewTurn = True
+                newPhase = True
+                newTurn = True
             if subSprites != None:
                 for i in subSprites:
-                    if i[1].rect.collidepoint(event.pos) and i[0] in [spellsEq, headEq, handEq, bodyEq, feetEq]:
+                    if i[1].rect.collidepoint(event.pos) and i[0] in [spellsEq, headEq, handEq, bodyEq, feetEq] and inSub:
                         inInspect = True
                         inspecting = i[0]
                     elif i[1].rect.collidepoint(event.pos) and inSub and not inInspect:
@@ -784,11 +894,14 @@ while running:
             if len(swapSprites) >  0:
                 for i in swapSprites:
                     if i[1].rect.collidepoint(event.pos) and inSwap:
-                        con.output("Swapped" + i[0] + " for " + itemFound + '.')
-                        print(i[0], eval(items[itemFound].type))
-                        eval(items[itemFound].type).remove(i[0])
-                        eval(items[itemFound].type).append(itemFound)
-                        exec(items[itemFound].type + 'Eq = "' + itemFound + '"')
+                        try:
+                            con.output("Swapped" + i[0] + " for " + itemFound + '.')
+                            print(i[0])
+                            eval(items[itemFound].type).remove(i[0])
+                            eval(items[itemFound].type).append(itemFound)
+                            exec(items[itemFound].type + 'Eq = "' + itemFound + '"')
+                        except:
+                            None
                         inSwap = False
 
         if namePass:
@@ -855,12 +968,15 @@ while running:
     if inHome:
         homeScreenGroup.update()
         homeScreenGroup.draw(s)
+        bigBlit(homeScreenGroup)
     if inLoad:
         loadScreenGroup.update()
         loadScreenGroup.draw(s)
+        bigBlit(loadScreenGroup)
     if inName:
         nameScreenGroup.update()
         nameScreenGroup.draw(s)
+        bigBlit(nameScreenGroup)
     if inNameConfirm:
         nameConfirmScreenGroup.empty()
         nameConfirmScreenGroup.add(NameConfirmBackground)
@@ -869,15 +985,19 @@ while running:
         nameConfirmScreenGroup.add(nameText)
         nameConfirmScreenGroup.update()
         nameConfirmScreenGroup.draw(s)
+        bigBlit(nameConfirmScreenGroup)
     if inCharacterGen:
         characterGenGroup.update()
         characterGenGroup.draw(s)
+        bigBlit(characterGenGroup)
     if inCharacterGen1:
         characterGenGroup1.update()
         characterGenGroup1.draw(s)
+        bigBlit(characterGenGroup1)
     if inCharacterGen2:
         characterGenGroup2.update()
         characterGenGroup2.draw(s)
+        bigBlit(characterGenGroup2)
     if inCharacterGenEnd:
         characterGenGroupEnd.empty()
         characterGenGroupEnd.add(characterGenEndBackground)
@@ -892,6 +1012,7 @@ while running:
         characterGenGroupEnd.add(rangeText)
         characterGenGroupEnd.update()
         characterGenGroupEnd.draw(s)
+        bigBlit(characterGenGroupEnd)
     if inGame:
         directions = []
         if genNewFloor:
@@ -910,7 +1031,6 @@ while running:
             genNewFloor = False
             playerX = start[0]
             playerY = start[1]
-            print(playerX, playerY)
             for i in mapArray:
                 print(i)
             indX = ((width/2) - ((size*10)/2))
@@ -940,6 +1060,7 @@ while running:
         actionsToRun = []
         roomGroup.update()
         roomGroup.draw(s)
+        bigBlit(roomGroup)
     if inMap:
         if newMap:
             mapGroup.empty()
@@ -947,6 +1068,7 @@ while running:
             newMap = False
         mapGroup.update()
         mapGroup.draw(s)
+        bigBlit(mapGroup)
     if inInventory:
         if newInventory:
             newInventory = False
@@ -968,6 +1090,7 @@ while running:
             inventoryGroup.add(base_sprite(width=64, height=64, image="images/items/" + spellsEq + ".png", x=110, y=10, scale=[50, 50]))
         inventoryGroup.update()
         inventoryGroup.draw(s)
+        bigBlit(inventoryGroup)
     if inSub:
         if newSub:
             newSub = False
@@ -997,13 +1120,13 @@ while running:
                 subGroup.add(subSprites[len(subSprites) - 1][1])
         subGroup.update()
         subGroup.draw(s)
+        bigBlit(subGroup)
     if inFight:
         fightGroup.empty()
         enemyBattleSprite = base_sprite(width=54, height=54, image="images/enemies/"+ enemyEncountered +".png", x=220, y=34, scale=[60, 60])
-        healthBarWidth = math.ceil(dist(enemyHealth, 0, enemies[enemyEncountered].health, 0, 100))
+        healthBarWidth = math.ceil(dist(enemyHealth, 0, enemyMaxHealth, 0, 100))
         healthBar = base_sprite(width=100, height=20, image="images/HealthBar.png", x=202, y=7, scale=[healthBarWidth, 20])
         playerHealthBarWidth = math.ceil(dist(currHealth, 0, healthStat, 0, 100))
-        print(healthStat, currHealth)
         playerHealthBar = base_sprite(width=100, height=20, image="images/HealthBar.png", x=12, y=142, scale=[playerHealthBarWidth, 20])
         fightGroup.add(fightBackground)
         fightGroup.add(enemyBattleSprite)
@@ -1016,6 +1139,12 @@ while running:
             enemyLevel = enemies[enemyEncountered].level
             expObtained = (random.randint(3, 4) * enemyLevel) - (enemyLevel - math.floor((enemyLevel / (random.randint(5, 6)))))
             con.output("You defeated " + enemyEncountered + " and gained "+ str(expObtained) +" XP!")
+            if random.randint(0, 1) == 0:
+                healthGained = math.floor(enemies[enemyEncountered].health / 3)
+                con.output("Gained " + str(healthGained) + " health!")
+                currHealth += healthGained
+                if currHealth > healthStat:
+                    currHealth = healthStat
             currXP += expObtained
             handleXP()
             move = True
@@ -1038,9 +1167,12 @@ while running:
                 elif delayAction == "attack":
                     damage = enemies[enemyEncountered].attack
                     damage = random.randint(damage - math.floor((damage/4)), damage + math.floor((damage/4)))
+                    damage += random.randint(0, floorLevel)
                     armorList = [spellsEq, headEq, bodyEq, handEq, feetEq]
                     for i in armorList:
                         damage -= items[i].health
+                        if damage < 0:
+                            damage = 0
                     con.output(enemyEncountered + " hit you for " + str(damage) + " damage!")
                     currHealth -= damage
                     if currHealth < 0:
@@ -1053,6 +1185,7 @@ while running:
                 delay -= 1
         fightGroup.update()
         fightGroup.draw(s)
+        bigBlit(fightGroup)
     if inDead:
         if subFloor:
             floorLevel -= 1
@@ -1064,6 +1197,7 @@ while running:
             con.output("Oh dear, you are dead!")
         deadGroup.update()
         deadGroup.draw(s)
+        bigBlit(deadGroup)
     if inSwap:
         if newSwap:
             newSwap = False
@@ -1081,6 +1215,7 @@ while running:
                 swapGroup.add(swapSprites[len(swapSprites)-1][1])
         swapGroup.update()
         swapGroup.draw(s)
+        bigBlit(swapGroup)
     if inInspect:
         inspectGroup.empty()
         inspectGroup.add(back)
@@ -1106,6 +1241,60 @@ while running:
         inspectGroup.add(speedTextInspect)
         inspectGroup.update()
         inspectGroup.draw(s)
+        bigBlit(inspectGroup)
+    if inBoss:
+        bossGroup.empty()
+        bossGroup.add(fightBackground)
+        if bossTurn:
+            if newTurn:
+                wait = 180
+                waitAction = "attack"
+                newTurn = False
+            turnText = text(bossEncountered + "'s turn", 50, 50, font_size=16)
+        else:
+            turnText = text("Your turn", 50, 50, font_size=16)
+        turnText.rerender(0, 50, center=True)
+        turnText.rerender(turnText.rect.x - 68, 50)
+        bossGroup.add(turnText)
+        healthBarOutlineBoss = base_sprite(width=104, height=24, image="images/HealthBarOutline.png", x=5, y=183)
+        healthBarWidthBoss = math.ceil(dist(currHealth, 0, healthStat, 0, 100))
+        healthBarBoss = base_sprite(width=100, height=20, image="images/HealthBar.png", x=7, y=185, scale=[healthBarWidthBoss, 20])
+        bossSprite = base_sprite(width=80, height=80, image="images/bosses/"+bossEncountered+".png", x=215, y=5)
+        bossHealthBarOutline = base_sprite(width=104, height=24, image="images/HealthBarOutline.png", x=40, y=20)
+        bossHealthBarWidth = math.ceil(dist(bossHealth, 0, bossMaxHealth, 0, 100))
+        bossHealthBar = base_sprite(width=100, height=20, image="images/HealthBar.png", x=42, y=22, scale=[bossHealthBarWidth, 20])
+        bossGroup.add(attackButton)
+        bossGroup.add(magicButton)
+        bossGroup.add(healthBarOutlineBoss)
+        bossGroup.add(healthBarBoss)
+        bossGroup.add(bossSprite)
+        bossGroup.add(bossHealthBarOutline)
+        bossGroup.add(bossHealthBar)
+        if wait > 0:
+            wait -= 1
+        if wait == 1:
+            if waitAction == "attack":
+                damage = random.randint(bossAttack - math.floor(bossAttack/4), bossAttack + math.floor(bossAttack/4))
+                for i in [spellsEq, headEq, bodyEq, handEq, feetEq]:
+                    damage -= items[i].health
+
+                con.output(bossEncountered + " hits you for " + str(damage) + "!")
+                currHealth -= damage
+                bossTurn = False
+        if currHealth <= 0:
+            bossHealth = 0
+            inDead = True
+            inBoss = False
+            currHealth = healthStat
+        if bossHealth <= 0:
+            bossHealth = 1
+            XPGained = randint(4 * floorLevel, 5 * floorLevel)
+            con.output("You defeated " + bossEncountered)
+            inBoss = False
+            floorLevel += 1
+            genNewFloor = True
+        bossGroup.draw(s)
+        bigBlit(bossGroup)
     if inCon:
         con.draw()
     pygame.display.update()
