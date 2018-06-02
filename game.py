@@ -516,8 +516,8 @@ def rfWrite():
             file.write('test mc man')
             file.flush()
             file.close()
-    except IOError as errno,strerror:
-        print "I/O error({0}): {1}".format(errno, strerror)
+    except IOError:
+        print "I/O error({0}): {1}".format(IOError)
 
 
 
