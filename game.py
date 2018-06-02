@@ -538,30 +538,30 @@ def rfWrite():
                 break
     block9 = [floorLevel, currLevel]
     while 1:
-        # try:
-        CS = 18
-        MOSI = 23
-        MISO = 24
-        SCLK = 25
-        pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
-        pn532.begin()
-        pn532.SAM_configuration()
-        uid = pn532.read_passive_target()
-        CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-        break
-        # except:
-        #     continue
+        try:
+            CS = 18
+            MOSI = 23
+            MISO = 24
+            SCLK = 25
+            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+            pn532.begin()
+            pn532.SAM_configuration()
+            uid = pn532.read_passive_target()
+            CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+            break
+        except:
+            continue
     for block in range(4, 10):
         while 1:
-            try:
-                if pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
-                    data = bytearray(16)
-                    for i in range(0, 16):
-                        data[i] = eval("block" + str(block) + "["+i+"]")
-                    if pn532.mifare_classic_write_block(block, data):
-                        break
-            except:
-                continue
+            # try:
+            if pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
+                data = bytearray(16)
+                for i in range(0, 16):
+                    data[i] = eval("block" + str(block) + "["+i+"]")
+                if pn532.mifare_classic_write_block(block, data):
+                    break
+            # except:
+            #     continue
 
 
 
