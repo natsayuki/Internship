@@ -471,28 +471,26 @@ def bigBlit(group):
     group.add(base_sprite(image=surface, width=320, height=240, x=0, y=0, surface=True))
     group.draw(s)
 def rfRead():
-    #all Things that need to be read here nice
-    def auth(uid, num):
-        return pn532.mifare_classic_authenticate_block(uid, num, PN532.MIFARE_CMD_AUTH_B, [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
-    def read(num):
-        return pn532.mifare_classic_read_block(num)
-    while 1:
-        try:
-            pn532 = PN532.PN532(cs=18, sclk=23, mosi=24, miso=25)
-            pn532.begin()
-            pn532.SAM_configuration()
-            break
-        except:
-            continue
+    global healthStat, attackStat, rangeStat, magicStat, speedStat, currHealth, currXP, currLevel, floorLevel
+    global spellsEq, headEq, bodyEq, handEq, feetEq, spells, head, body, hand, feet, genNewFloor
+    CS = 18
+    MOSI = 23
+    MISO = 24
+    SCLK = 25
+    pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+    pn532.begin()
+    pn532.SAM_configuration()
     con.output("Place figure on reader.")
-
-    while 1:
+    uid = pn532.read_passive_target()
+    while uid is None:
         uid = pn532.read_passive_target()
-        if uid is None:
-            continue
-        if not auth(4):
-            continue
-        data = read(num)
+    with open("saves/" + str(binascii.hexlify(uid)).replace("'", '') + '.json') as file:
+        stuffToLoad = json.loads(file.readlines()[0])
+        for i in stuffToLoad:
+            exec(i + " = " + stuffToLoad[i])
+        genNewFloor = True
+    con.output("Load complete. It save safe to remove figure.")
+
 
 
 def rfWrite():
@@ -507,12 +505,14 @@ def rfWrite():
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
+    con.output("Place figure on reader.")
     uid = pn532.read_passive_target()
     while uid is None:
         uid = pn532.read_passive_target()
     with open("saves/" + str(binascii.hexlify(uid)).replace("'", '') + '.json', 'w') as file:
         print(json.dumps(stuffToSave))
         file.write(json.dumps(stuffToSave))
+    con.output("Save complete! It is safe to remove figure.")
 
 
 
@@ -523,7 +523,7 @@ def rfWrite():
 
 # text = text("TEST", "Comic Sans MS",16,(0, 0, 0),15,15,255)
 # SPRITES
-rfWrite()
+
 homeScreenGroup = pygame.sprite.Group()
 loadScreenGroup = pygame.sprite.Group()
 nameScreenGroup = pygame.sprite.Group()
@@ -718,12 +718,15 @@ while running:
                     inBody = False
                     inFeet = False
                     inInspect = False
+            elif event.key == pygame.K_ESCAPE:
+                running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if button.rect.collidepoint(event.pos) and inHome:
                 inHome = False
                 inLoad = True
             elif scanButton.rect.collidepoint(event.pos) and inLoad:
                 print("Load Screen")
+                rfRead()
             elif newButton.rect.collidepoint(event.pos) and inLoad:
                 inLoad = False
                 inName = True
