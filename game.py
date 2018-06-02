@@ -487,7 +487,10 @@ def rfRead():
     with open("saves/" + str(binascii.hexlify(uid)).replace("'", '') + '.json') as file:
         stuffToLoad = json.loads(file.readlines()[0])
         for i in stuffToLoad:
-            exec(i + " = " + stuffToLoad[i])
+            if isinstance(i, basestring):
+                exec(i + " = '" + stuffToLoad[i] + "'")
+            else:
+                exec(i + " = " + stuffToLoad[i])
         genNewFloor = True
     con.output("Load complete. It save safe to remove figure.")
 
