@@ -32,7 +32,7 @@ elif option == "write":
         print('Error! Failed to authenticate block 4 with the card.')
         sys.exit(-1)
     data = bytearray(16)
-    data[0:4] = "test"
+    data[0:4] = b'test'
     if not pn532.mifare_classic_write_block(4, data):
         print('Error! Failed to write to the card.')
         sys.exit(-1)
