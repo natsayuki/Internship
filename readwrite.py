@@ -9,6 +9,7 @@ SCLK = 25
 while 1:
     try:
         pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+        pn532.beign()
         pn532.SAM_configuration()
 
         option = input("read or write")
