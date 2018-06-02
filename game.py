@@ -538,19 +538,19 @@ def rfWrite():
                 break
     block9 = [floorLevel, currLevel]
     while 1:
-        # try:
-        CS = 18
-        MOSI = 23
-        MISO = 24
-        SCLK = 25
-        pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
-        pn532.begin()
-        pn532.SAM_configuration()
-        uid = pn532.read_passive_target()
-        CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-        break
-        # except:
-        #     continue
+        try:
+            CS = 18
+            MOSI = 23
+            MISO = 24
+            SCLK = 25
+            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+            pn532.begin()
+            pn532.SAM_configuration()
+            uid = pn532.read_passive_target()
+            CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+            break
+        except:
+            continue
     for block in range(4, 10):
         while 1:
             # try:
