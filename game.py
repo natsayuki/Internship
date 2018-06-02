@@ -7,6 +7,7 @@ import PyCon
 import time
 import Adafruit_PN532 as PN532
 import json
+import binascii
 
 # INIT
 pygame.init()
