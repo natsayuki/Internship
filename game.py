@@ -538,7 +538,7 @@ def rfWrite():
                 break
     block9 = [floorLevel, currLevel]
     while 1:
-        # try:
+        try:
             CS = 18
             MOSI = 23
             MISO = 24
@@ -549,8 +549,8 @@ def rfWrite():
             uid = pn532.read_passive_target()
             CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
             break
-        # except:
-        #     continue
+        except:
+            continue
     for block in range(4, 10):
         while 1:
             # try:
