@@ -510,7 +510,7 @@ def rfWrite():
     uid = pn532.read_passive_target()
     while uid is None:
         uid = pn532.read_passive_target()
-    with open("saves/" + str(binascii.hexlify(uid)) + '.txt', 'w+') as file:
+    with open("saves/" + str(binascii.hexlify(uid)) + '.txt', 'a') as file:
         print(json.dumps(stuffToSave))
         file.write('test mc man')
         file.flush()
