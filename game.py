@@ -491,7 +491,9 @@ def rfRead():
                 exec(i + " = '" + stuffToLoad[i] + "'")
             else:
                 exec(i + " = " + str(stuffToLoad[i]))
-        genNewFloor = True
+    genNewFloor = True
+    inGame = True
+    inLoad = False
     con.output("Load complete. It save safe to remove figure.")
 
 
