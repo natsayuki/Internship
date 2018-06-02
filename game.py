@@ -135,6 +135,10 @@ inBossEnd = False
 hitTimer = 0
 newTurn = True
 wait = 0
+newRead = True
+inFigureLoad = False
+inBetween = False
+inSave = False
 
 
 enemySprite = base_sprite(width=0, height=0, image="images/enemies/Devil.png", x=(width/2) - 40, y=(height/2) - 40)
@@ -546,6 +550,8 @@ deadGroup = pygame.sprite.Group()
 swapGroup = pygame.sprite.Group()
 inspectGroup = pygame.sprite.Group()
 bossGroup = pygame.sprite.Group()
+loadFigureGroup = pygame.sprite.Group()
+betweenGroup = pygame.sprite.Group()
 
 button = base_sprite(width=70, height=50, image="images/HomeScreenStartButton.png", x=(width/2) - (70/2), y=120)
 homeScreen = base_sprite(width=320, height=240, image="images/back.png", x=0, y=0)
@@ -688,6 +694,16 @@ inspectGroup.add(xButton)
 
 bossGroup.add(fightBackground)
 
+loadFigureGroup.add(back)
+loadFigureText = text("Place figure on reader", 0, 0)
+loadFigure.rerender(0, 10, center=True)
+
+saveButton = base_sprite(width=70, height=50, image="images/SaveButton.png", x=45, y=170)
+
+betweenGroup.add(back)
+betweenGroup.add(saveButton)
+betweenGroup.add(continueButton)
+
 
 # MAIN
 move = False
@@ -730,8 +746,7 @@ while running:
                 inHome = False
                 inLoad = True
             elif scanButton.rect.collidepoint(event.pos) and inLoad:
-                print("Load Screen")
-                rfRead()
+                inFigureLoad = True
             elif newButton.rect.collidepoint(event.pos) and inLoad:
                 inLoad = False
                 inName = True
@@ -895,11 +910,21 @@ while running:
                 inDead = False
                 genNewFloor = True
             elif stairsSprite.rect.collidepoint(event.pos) and inGame and [playerX, playerY] == stairs and not inInventory:
+                # if str(floorLevel)[len(str(floorLevel)) -1] == '9':
+                #     genBoss()
+                # else:
+                #     genNewFloor = True
+                #     floorLevel += 1
+                inBetween = True
+            elif saveButton.rect.collidepoint(event.pos) and inBetween:
+                inSave = True
+            elif continueButton.rect.collidepoint(event.pos) and inBetween:
                 if str(floorLevel)[len(str(floorLevel)) -1] == '9':
                     genBoss()
                 else:
                     genNewFloor = True
                     floorLevel += 1
+                inBetween = False
             elif chestSprite.rect.collidepoint(event.pos) and inGame and  not treasureClicked and not inInventory:
                 treasureClicked = True
                 itemFound = list(items.keys())[random.randint(0, len(items) -1)]
@@ -1359,6 +1384,26 @@ while running:
 
         bossGroup.draw(s)
         #bigBlit(bossGroup)
+    if inFigureLoad:
+        if newLoad:
+            rfRead()
+        loadFigureGroup.draw(s)
+    if inBetween:
+        betweenGroup.empty()
+        betweenGroup.add(back)
+        if not inSave:
+            betweenFloorText = text("Completed floor " + str(floorLevel) +"!", 0, 0)
+            betweenFloorText.rerender(0, 10, center=True)
+            betweenGroup.add(betweenFloorText)
+            betweenGroup.add(saveButton)
+            betweenGroup.add(continueButton)
+        else:
+            betweenFloorText = text("Place figurine on reader", 0, 0)
+            betweenFloorText.rerender(0, 10, center=True)
+            betweenGroup.add(betweenFloorText)
+            rfWrite()
+            inSave = False
+        betweenGroup.draw(s)
     if inCon:
         con.draw()
     pygame.display.update()
