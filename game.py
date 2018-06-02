@@ -539,7 +539,7 @@ def rfWrite():
     block9 = [floorLevel, currLevel]
     while 1:
         try:
-            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+            pn532 = PN532.PN532(cs=18, sclk=23, mosi=24, miso=25)
             pn532.begin()
             pn532.SAM_configuration()
             uid = pn532.read_passive_target()
