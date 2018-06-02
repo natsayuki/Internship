@@ -5,7 +5,7 @@ from random import randint
 import math
 import PyCon
 import time
-import Adafruit_PN532
+import Adafruit_PN532 as PN532
 
 # INIT
 pygame.init()
