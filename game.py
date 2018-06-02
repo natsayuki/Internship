@@ -696,7 +696,7 @@ bossGroup.add(fightBackground)
 
 loadFigureGroup.add(back)
 loadFigureText = text("Place figure on reader", 0, 0)
-loadFigure.rerender(0, 10, center=True)
+loadFigureText.rerender(0, 10, center=True)
 
 saveButton = base_sprite(width=70, height=50, image="images/SaveButton.png", x=45, y=170)
 
