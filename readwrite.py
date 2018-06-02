@@ -27,12 +27,9 @@ if option == "read":
 elif option == "write":
     uid = pn532.read_passive_target()
     CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-    if not pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
-        print("uh oh no auth")
+    data = bytearray(16)
+    data[0:4] = b'test'
+    if not pn532.mifare_classic_write_block(4, data):
+        print("oh no could not write")
     else:
-        data = bytearray(16)
-        data[0:4] = b'test'
-        if not pn532.mifare_classic_write_block(4, data):
-            print("oh no could not write")
-        else:
-            print("write success")
+        print("write success")
