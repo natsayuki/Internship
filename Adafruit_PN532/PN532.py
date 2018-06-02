@@ -317,8 +317,6 @@ class PN532(object):
             return None
         # Verify ACK response and wait to be ready for function response.
         response = self._read_data(len(PN532_ACK))
-        if response != PN532_ACK:
-            raise RuntimeError('Did not receive expected ACK from PN532!')
         if not self._wait_ready(timeout_sec):
             return None
         # Read response bytes.
