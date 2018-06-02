@@ -510,13 +510,9 @@ def rfWrite():
     uid = pn532.read_passive_target()
     while uid is None:
         uid = pn532.read_passive_target()
-    try:
-        with open("saves/" + str(binascii.hexlify(uid)) + '.json', 'w') as file:
-            print(json.dumps(stuffToSave))
-            file.write('test mc man')
-    except IOError:
-        print ("I/O error({0}): {1}".format(IOError))
-
+    file = os.open("saves/" + str(binascii.hexlify(uid)) + '.json', os.O_RDWR|os.CREAT)
+    os.write(file, stuffToSave)
+    os.close(file)
 
 
 
