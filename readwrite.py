@@ -25,7 +25,7 @@ while 1:
             if not pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B,
                                                [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]):
                 print('Failed to authenticate block 4!')
-        continue
+                continue
             data = pn532.mifare_classic_read_block(4)
             if data is None:
                 print('Failed to read block 4!')
