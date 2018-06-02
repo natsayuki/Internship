@@ -5,6 +5,7 @@ from random import randint
 import math
 import PyCon
 import time
+import Adafruit_PN532
 
 # INIT
 pygame.init()
@@ -1247,9 +1248,18 @@ while running:
     if inBoss:
         bossGroup.empty()
         bossGroup.add(fightBackground)
+        if bossHealth <= 0:
+            bossHealth = 1
+            XPGained = random.randint(4 * floorLevel, 5 * floorLevel)
+            con.output("You defeated " + bossEncountered + " for " + str(XPGained) + " XP!")
+            currXP += XPGained
+            handleXP()
+            inBoss = False
+            floorLevel += 1
+            genNewFloor = True
         if bossTurn:
             if newTurn:
-                wait = 180
+                wait = 60
                 waitAction = "attack"
                 newTurn = False
             turnText = text(bossEncountered + "'s turn", 50, 50, font_size=16)
@@ -1289,13 +1299,7 @@ while running:
             inBoss = False
             currHealth = healthStat
             floorLevel -= 2
-        if bossHealth <= 0:
-            bossHealth = 1
-            XPGained = random.randint(4 * floorLevel, 5 * floorLevel)
-            con.output("You defeated " + bossEncountered)
-            inBoss = False
-            floorLevel += 1
-            genNewFloor = True
+
         bossGroup.draw(s)
         #bigBlit(bossGroup)
     if inCon:
