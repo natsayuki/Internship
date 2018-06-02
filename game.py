@@ -539,6 +539,9 @@ def rfWrite():
     block9 = [floorLevel, currLevel]
     while 1:
         try:
+            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+            pn532.begin()
+            pn532.SAM_configuration()
             uid = pn532.read_passive_target()
             CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
             break
@@ -703,6 +706,7 @@ deadText.rerender(0, 5, center=True)
 deadMessageText = text("You will be returned to the previous floor", 0, 0, font_size=16)
 deadMessageText.rerender(0, 65, center=True)
 deadContinueButton = base_sprite(width=70, height=50, image="images/ContinueButton.png", x=125, y=170)
+
 deadGroup.add(back)
 deadGroup.add(deadContinueButton)
 deadGroup.add(deadText)
