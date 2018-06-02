@@ -513,8 +513,8 @@ def rfWrite():
     with open("saves/" + str(binascii.hexlify(uid)) + '.json', 'w') as file:
         print(json.dumps(stuffToSave))
         file.write('test mc man')
-
-
+        print("done")
+    print("dome")
 
 
 
