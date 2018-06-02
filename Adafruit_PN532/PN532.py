@@ -255,10 +255,10 @@ class PN532(object):
         offset = 1
         while response[offset] == 0x00:
             offset += 1
-            if offset >= len(response):
-                raise RuntimeError('Response frame preamble does not contain 0x00FF!')
-        if response[offset] != 0xFF:
-            raise RuntimeError('Response frame preamble does not contain 0x00FF!')
+        #     if offset >= len(response):
+        #         raise RuntimeError('Response frame preamble does not contain 0x00FF!')
+        # if response[offset] != 0xFF:
+        #     raise RuntimeError('Response frame preamble does not contain 0x00FF!')
         offset += 1
         if offset >= len(response):
                 raise RuntimeError('Response contains no data!')
