@@ -6,6 +6,7 @@ import math
 import PyCon
 import time
 import Adafruit_PN532 as PN532
+import json
 
 # INIT
 pygame.init()
@@ -493,80 +494,25 @@ def rfRead():
 
 
 def rfWrite():
-    block4 = []
-    for stat in [attackStat, healthStat, rangeStat, magicStat]:
-        for i in range(0, 4):
-            block4.append(stat/4)
-    block5 = []
-    for stat in [speedStat, currHealth]:
-        for i in range(0, 4):
-            block5.append(stat/4)
-    for i in range(0, 8):
-        block5.append(currXP/8)
-    block6 = []
-    for i in [spellsEq, handEq, headEq, bodyEq, feetEq]:
-        for index, item in enumerate(list(items.keys())):
-            if i == item:
-                block6.append(index)
-                break
-    for i in spells:
-        for index, item in enumerate(list(items.keys())):
-            if i == item:
-                block6.append(index)
-                break
-    block7 =[]
-    for i in head:
-        for index, item in enumerate(list(items.keys())):
-            if i == item:
-                block7.append(index)
-                break
-    for i in body:
-        for index, item in enumerate(list(items.keys())):
-            if i == item:
-                block7.append(index)
-                break
-    block8 = []
-    for i in hand:
-        for index, item in enumerate(list(items.keys())):
-            if i == item:
-                block8.append(index)
-                break
-    for i in feet:
-        for index, item in enumerate(list(items.keys())):
-            if i == item:
-                block8.append(index)
-                break
-    block9 = [floorLevel, currLevel]
-    while 1:
-        try:
-            CS = 18
-            MOSI = 23
-            MISO = 24
-            SCLK = 25
-            pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
-            pn532.begin()
-            pn532.SAM_configuration()
+    stuffToSave = ['healthStat', 'attackStat', 'rangeStat', 'magicStat', 'speedStat', 'currHealth', 'currXP', 'currLevel', 'floorLevel',
+    'spellsEq', 'headEq', 'bodyEq', 'handEq', 'feetEq', 'spells', 'head', 'body', 'hand', 'feet']
+    stuffToSave = dict  ( (name,eval(name)) for name in stuffToSave )
 
-            uid = pn532.read_passive_target()
-            CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-            break
-        except:
-            continue
-    for block in range(4, 10):
-        while 1:
-            try:
-                if pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
-                    data = bytearray(16)
-                    for i in range(0, 16):
-                        try:
-                            print("block" + str(block) + "["+str(i)+"]")
-                            data[i] = int(eval("block" + str(block) + "["+str(i)+"]"))
-                        except:
-                            None
-                    if pn532.mifare_classic_write_block(block, data):
-                        break
-            except:
-                    continue
+    CS = 18
+    MOSI = 23
+    MISO = 24
+    SCLK = 25
+    pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
+    pn532.begin()
+    pn532.SAM_configuration()
+    uid = pn532.read_passive_target()
+    while uid is None:
+        uid = pn532.read_passive_target()
+    file = open("saves/" + uid + '.json', 'w+')
+    file.write(json.dumps(stuffToSave))
+
+
+
 
 
 
