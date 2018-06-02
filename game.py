@@ -557,8 +557,10 @@ def rfWrite():
             if pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
                 data = bytearray(16)
                 for i in range(0, 16):
-                    print("block" + str(block) + "["+str(i)+"]")
-                    data[i] = int(eval("block" + str(block) + "["+str(i)+"]"))
+                    try:
+                        data[i] = int(eval("block" + str(block) + "["+str(i)+"]"))
+                    except:
+                        pass
                 if pn532.mifare_classic_write_block(block, data):
                     break
             # except:
