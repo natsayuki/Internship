@@ -139,6 +139,7 @@ newRead = True
 inFigureLoad = False
 inBetween = False
 inSave = False
+newLoad = True
 
 
 enemySprite = base_sprite(width=0, height=0, image="images/enemies/Devil.png", x=(width/2) - 40, y=(height/2) - 40)
