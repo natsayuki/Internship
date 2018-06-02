@@ -512,7 +512,7 @@ def rfWrite():
         uid = pn532.read_passive_target()
     with open("saves/" + str(binascii.hexlify(uid)) + '.json', 'w') as file:
         print(json.dumps(stuffToSave))
-        file.write(json.dumps(stuffToSave))
+        file.write(str(json.dumps(stuffToSave)))
         file.flush()
         file.close()
 
