@@ -558,6 +558,7 @@ def rfWrite():
                     data = bytearray(16)
                     for i in range(0, 16):
                         try:
+                            print("block" + str(block) + "["+str(i)+"]")
                             data[i] = int(eval("block" + str(block) + "["+str(i)+"]"))
                         except:
                             pass
