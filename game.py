@@ -8,6 +8,7 @@ import time
 import Adafruit_PN532 as PN532
 import json
 import binascii
+import os
 
 # INIT
 pygame.init()
@@ -509,7 +510,9 @@ def rfWrite():
     uid = pn532.read_passive_target()
     while uid is None:
         uid = pn532.read_passive_target()
-    with open("saves/" + str(binascii.hexlify(uid)) + '.json', 'w+') as file:
+    # if not os.path.exists("saves/" + str(binascii.hexlify(uid)) + '.json'):
+    #
+    with open("saves/" + str(binascii.hexlify(uid)) + '.json', 'w') as file:
         file.write(json.dumps(stuffToSave))
 
 
