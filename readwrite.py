@@ -30,7 +30,7 @@ while 1:
             if data is None:
                 print('Failed to read block 4!')
                 continue
-            print('Read block 4: 0x{0}'.format(binascii.hexlify(data[0])))
+            print('Read block 4: 0x{0}'.format(data[0]))
     elif option == "write":
         uid = pn532.read_passive_target()
         CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
