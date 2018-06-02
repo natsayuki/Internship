@@ -249,8 +249,8 @@ class PN532(object):
         logger.debug('Read frame: 0x{0}'.format(binascii.hexlify(response)))
         # Check frame starts with 0x01 and then has 0x00FF (preceeded by optional
         # zeros).
-        if response[0] != 0x01:
-            raise RuntimeError('Response frame does not start with 0x01!')
+        # if response[0] != 0x01:
+        #     raise RuntimeError('Response frame does not start with 0x01!')
         # Swallow all the 0x00 values that preceed 0xFF.
         offset = 1
         while response[offset] == 0x00:
@@ -317,6 +317,8 @@ class PN532(object):
             return None
         # Verify ACK response and wait to be ready for function response.
         response = self._read_data(len(PN532_ACK))
+        # if response != PN532_ACK:
+        #     raise RuntimeError('Did not receive expected ACK from PN532!')
         if not self._wait_ready(timeout_sec):
             return None
         # Read response bytes.
