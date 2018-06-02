@@ -22,6 +22,10 @@ while 1:
             if uid is None:
                 continue
             print('Found card with UID: 0x{0}'.format(binascii.hexlify(uid)))
+            if not pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B,
+                                               [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]):
+                print('Failed to authenticate block 4!')
+        continue
             data = pn532.mifare_classic_read_block(4)
             if data is None:
                 print('Failed to read block 4!')
@@ -35,7 +39,7 @@ while 1:
             print('Error! Failed to authenticate block 4 with the card.')
             sys.exit(-1)
         data = bytearray(16)
-        data[0] = 1 
+        data[0] = 1
         if not pn532.mifare_classic_write_block(4, data):
             print('Error! Failed to write to the card.')
             sys.exit(-1)
