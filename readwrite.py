@@ -26,6 +26,7 @@ if option == "read":
         print('Read block 4: 0x{0}'.format(binascii.hexlify(data[:4])))
 elif option == "write":
     uid = pn532.read_passive_target()
+    CARD_KEY = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
     if not pn532.mifare_classic_authenticate_block(uid, 4, PN532.MIFARE_CMD_AUTH_B, CARD_KEY):
         print("uh oh no auth")
     else:
