@@ -35,7 +35,7 @@ while 1:
             print('Error! Failed to authenticate block 4 with the card.')
             sys.exit(-1)
         data = bytearray(16)
-        data[0:4] = b'test'
+        data[0] = 1 
         if not pn532.mifare_classic_write_block(4, data):
             print('Error! Failed to write to the card.')
             sys.exit(-1)
