@@ -1389,8 +1389,8 @@ while running:
         if newLoad:
             rfRead()
             newLoad = False
-        inGame = True
-        genNewFloor = True
+            inGame = True
+            genNewFloor = True
         loadFigureGroup.draw(s)
     if inBetween:
         betweenGroup.empty()
