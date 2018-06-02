@@ -558,7 +558,7 @@ def rfWrite():
                 data = bytearray(16)
                 for i in range(0, 16):
                     print("block" + str(block) + "["+str(i)+"]")
-                    data[i] = eval("block" + str(block) + "["+str(i)+"]")
+                    data[i] = int(eval("block" + str(block) + "["+str(i)+"]"))
                 if pn532.mifare_classic_write_block(block, data):
                     break
             # except:
