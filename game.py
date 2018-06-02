@@ -1391,6 +1391,7 @@ while running:
             newLoad = False
             inGame = True
             genNewFloor = True
+            inFigureLoad = False
         loadFigureGroup.draw(s)
     if inBetween:
         betweenGroup.empty()
