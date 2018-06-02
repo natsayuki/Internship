@@ -39,5 +39,5 @@ while 1:
                 print('Error! Failed to write to the card.')
                 sys.exit(-1)
             print('Wrote card successfully! You may now remove the card from the PN532.')
-        except:
-            print("except")
+    except:
+        print("except")
