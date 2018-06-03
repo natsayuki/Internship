@@ -533,7 +533,7 @@ def rfWrite():
 
 # text = text("TEST", "Comic Sans MS",16,(0, 0, 0),15,15,255)
 # SPRITES
-rfRead()
+# rfRead()
 
 homeScreenGroup = pygame.sprite.Group()
 loadScreenGroup = pygame.sprite.Group()
