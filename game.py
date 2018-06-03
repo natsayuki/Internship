@@ -478,10 +478,10 @@ def bigBlit(group):
 def rfRead():
     global healthStat, attackStat, rangeStat, magicStat, speedStat, currHealth, currXP, currLevel, floorLevel
     global spellsEq, headEq, bodyEq, handEq, feetEq, spells, head, body, hand, feet, genNewFloor, inGame, inLoad, classPicked
-    CS = 18
-    MOSI = 23
-    MISO = 24
-    SCLK = 25
+    CS = 5
+    MOSI = 6
+    MISO = 16
+    SCLK = 26
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
@@ -508,10 +508,10 @@ def rfWrite():
     'spellsEq', 'headEq', 'bodyEq', 'handEq', 'feetEq', 'spells', 'head', 'body', 'hand', 'feet', 'classPicked']
     stuffToSave = dict  ( (name,eval(name)) for name in stuffToSave )
 
-    CS = 18
-    MOSI = 23
-    MISO = 24
-    SCLK = 25
+    CS = 5
+    MOSI = 6
+    MISO = 16
+    SCLK = 26
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
