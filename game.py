@@ -477,7 +477,7 @@ def bigBlit(group):
     group.draw(s)
 def rfRead():
     global healthStat, attackStat, rangeStat, magicStat, speedStat, currHealth, currXP, currLevel, floorLevel
-    global spellsEq, headEq, bodyEq, handEq, feetEq, spells, head, body, hand, feet, genNewFloor, inGame, inLoad
+    global spellsEq, headEq, bodyEq, handEq, feetEq, spells, head, body, hand, feet, genNewFloor, inGame, inLoad, classPicked
     CS = 18
     MOSI = 23
     MISO = 24
@@ -505,7 +505,7 @@ def rfRead():
 
 def rfWrite():
     stuffToSave = ['healthStat', 'attackStat', 'rangeStat', 'magicStat', 'speedStat', 'currHealth', 'currXP', 'currLevel', 'floorLevel',
-    'spellsEq', 'headEq', 'bodyEq', 'handEq', 'feetEq', 'spells', 'head', 'body', 'hand', 'feet']
+    'spellsEq', 'headEq', 'bodyEq', 'handEq', 'feetEq', 'spells', 'head', 'body', 'hand', 'feet', 'classPicked']
     stuffToSave = dict  ( (name,eval(name)) for name in stuffToSave )
 
     CS = 18
