@@ -483,7 +483,7 @@ def rfRead():
     MISO = 24
     SCLK = 25
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
-    pn532.begin()
+    # pn532.begin()
     pn532.SAM_configuration()
     con.output("Place figure on reader.")
     uid = pn532.read_passive_target()
