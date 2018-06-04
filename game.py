@@ -510,10 +510,10 @@ def rfWrite():
     stuffToSave = dict  ( (name,eval(name)) for name in stuffToSave )
 
     # 5, 6, 16, 26
-    CS = 7
-    MOSI = 20
-    MISO = 19
-    SCLK = 21
+    CS = 18
+    MOSI = 23
+    MISO = 24
+    SCLK = 25
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
