@@ -6,10 +6,10 @@ k = Controller()
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-GPIO.setup(17, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-GPIO.setup(22, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-GPIO.setup(27, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+GPIO.setup(17, GPIO.IN)
+GPIO.setup(22, GPIO.IN)
+GPIO.setup(23, GPIO.IN)
+GPIO.setup(27, GPIO.IN)
 
 while 1:
     print(GPIO.input(17))
