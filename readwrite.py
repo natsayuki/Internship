@@ -1,10 +1,10 @@
 import Adafruit_PN532 as PN532
 import binascii
 
-CS = 18
-MOSI = 23
-MISO = 24
-SCLK = 25
+CS = 7
+MOSI = 20
+MISO = 19
+SCLK = 21
 
 while 1:
     # try:
