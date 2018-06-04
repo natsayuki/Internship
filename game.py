@@ -480,9 +480,9 @@ def rfRead():
     global spellsEq, headEq, bodyEq, handEq, feetEq, spells, head, body, hand, feet, genNewFloor, inGame, inLoad, classPicked
     # 5, 6, 16, 26
     CS = 7
-    MOSI = 23
-    MISO = 24
-    SCLK = 25
+    MOSI = 20
+    MISO = 19
+    SCLK = 21
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
@@ -511,9 +511,9 @@ def rfWrite():
 
     # 5, 6, 16, 26
     CS = 7
-    MOSI = 23
-    MISO = 24
-    SCLK = 25
+    MOSI = 20
+    MISO = 19
+    SCLK = 21
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
