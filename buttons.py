@@ -13,7 +13,7 @@ GPIO.setup(23, GPIO.IN)
 GPIO.setup(27, GPIO.IN)
 
 while 1:
-    if GPIO.input(17) == 1:
+    if GPIO.input(17) == 0:
         k.press('c')
         k.release('c')
         sleep(.5)
