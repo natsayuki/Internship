@@ -15,11 +15,14 @@ while 1:
     if GPIO.input(17) == 1:
         k.press('c')
         k.release('c')
+        print('c')
     elif GPIO.input(22) == 1:
         k.press('m')
         k.release('m')
+        print('m')
     elif GPIO.input(23) == 1:
         k.press('i')
         k.release('i')
+        print('i')
     elif GPIO.input(27) == 1:
         None
