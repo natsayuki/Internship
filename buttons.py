@@ -12,7 +12,7 @@ GPIO.setup(23, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 GPIO.setup(27, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 while 1:
-    GPIO.read(17)
+    print(GPIO.input(17))
     if GPIO.input(17) == 1:
         k.press('c')
         k.release('c')
