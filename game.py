@@ -479,10 +479,10 @@ def rfRead():
     global healthStat, attackStat, rangeStat, magicStat, speedStat, currHealth, currXP, currLevel, floorLevel
     global spellsEq, headEq, bodyEq, handEq, feetEq, spells, head, body, hand, feet, genNewFloor, inGame, inLoad, classPicked
     # 5, 6, 16, 26
-    CS = 16
+    CS = 26
     MOSI = 5
     MISO = 6
-    SCLK = 26
+    SCLK = 16
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
@@ -510,10 +510,10 @@ def rfWrite():
     stuffToSave = dict  ( (name,eval(name)) for name in stuffToSave )
 
     # 5, 6, 16, 26
-    CS = 16
+    CS = 26
     MOSI = 5
     MISO = 6
-    SCLK = 26
+    SCLK = 16
     pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
     pn532.begin()
     pn532.SAM_configuration()
