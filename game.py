@@ -492,7 +492,7 @@ def rfRead():
         uid = pn532.read_passive_target()
     with open("saves/" + str(binascii.hexlify(uid)).replace("'", '') + '.json') as file:
         stuffToLoad = json.loads(file.readlines()[0])
-        for i in stuffToLoad:
+        for i in stuffToLoad.keys():
             if isinstance(stuffToLoad[i], str):
                 exec(i + " = '" + stuffToLoad[i] + "'")
             else:
