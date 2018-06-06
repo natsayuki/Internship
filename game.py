@@ -497,6 +497,7 @@ def rfRead():
                 exec(i + " = '" + stuffToLoad[i] + "'")
             else:
                 exec(i + " = " + str(stuffToLoad[i]))
+    print(classPicked + ' class')
     genNewFloor = True
     inGame = True
     inLoad = False
